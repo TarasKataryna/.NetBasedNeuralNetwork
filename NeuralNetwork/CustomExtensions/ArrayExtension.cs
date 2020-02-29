@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork.Extensions
 {
-    static class ArrayExtension
+    public static class ArrayExtension
     {
         public static double[][] Transpose(this double[][] array)
         {
@@ -168,6 +168,42 @@ namespace NeuralNetwork.Extensions
             }
 
             return toReturn;
+        }
+
+        public static void Show(this double[][] first)
+        {
+            for(int i = 0; i< first.Length; ++i)
+            {
+                for(int j = 0; j < first[i].Length; ++j)
+                {
+                    Console.Write(" " + first[i][j] + " ");
+                }
+                Console.WriteLine();
+            } 
+        }
+
+        public static double[][] DeepCopy(this double[][] first)
+        {
+            var ret = new double[first.Length][];
+            for (int i = 0; i < first.Length; ++i)
+            {
+                ret[i] = (double[])first[i].Clone();
+            }
+            return ret;
+        }
+
+        public static double[][][] DeepCopy(this double[][][] first)
+        {
+            var ret = new double[first.Length][][];
+            for (int i = 0; i < first.Length; ++i)
+            {
+                ret[i] = new double[first[i].Length][];
+                for(int j = 0; j < first[i].Length; ++j)
+                {
+                    ret[i][j] = (double[])first[i][j].Clone();
+                }
+            }
+            return ret;
         }
     }
 }
