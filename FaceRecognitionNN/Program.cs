@@ -15,16 +15,19 @@ namespace FaceRecognitionNN
     {
         static void Main(string[] args)
         {
-            var b = new double[1][][];
-            b[0] = ArrayHelper.Matrix(7, 7, 1);
-            var c = b.DeepCopy();
-
-            b[0][0][0] = 87;
-            c[0].Show();
+            var b = ArrayHelper.Matrix(3, 3, 0);
+            Pr(b);
+            b.Show();
             /*var a = ProcessMap();
             a.Show();*/
             Console.Read();
         }
+
+        public static void Pr(double[][] a)
+        {
+            a[0][0] = 1;
+        }
+
         public static  double[][] ProcessMap()
         {
             List<double[][]> maps = new List<double[][]>

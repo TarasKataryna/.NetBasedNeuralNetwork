@@ -52,6 +52,7 @@ namespace NeuralNetwork.Components
 
             for (int depth = 0; depth < KernelDepth; ++depth)
             {
+                //just simple convolution
                 for (int i = 0; i < featureMapSize; ++i)
                 {
                     for (int j = 0; j < featureMapSize; ++j)
@@ -112,7 +113,15 @@ namespace NeuralNetwork.Components
         {
             var kernelsCopy = Kernels[kernelIndex].DeepCopy();
 
-            //implement other part
+            for (int i = 0; i < Kernels[kernelIndex].Length; ++i)
+            {
+                FindKernelGradientAndUpdate(LastInput[i], outputMapGradient, kernelIndex, i);
+            }
+
+            for (int i = 0; i < Kernels[kernelIndex].Length; ++i)
+            {
+                FindInputGradientAndUpdate(kernelsCopy[i], outputMapGradient, kernelIndex, i, gradientForInput[i]);
+            }
 
         }
 
@@ -120,31 +129,31 @@ namespace NeuralNetwork.Components
 
         #region Private Methods
 
-        private double[][] KernelDerivative(double[][] inputForKernelLayer, double[][] derivOutput)
+        ///Find gradient for one of kernel matrixes  and update
+        private void FindKernelGradientAndUpdate(double[][] inputForKernelLayer, double[][] gradOutput, int kernelIndex, int kernelLayerIndex)
         {
-
-            var gradientToReturn = new double[KernelSize][];
+            //just simple convolution with weight update 
             for (int i = 0; i < KernelSize; ++i)
             {
-                gradientToReturn[i] = new double[KernelSize];
                 for (int j = 0; j < KernelSize; ++j)
                 {
                     double res = 0;
-                    for (int a = 0; a < derivOutput.Length; ++a)
+                    for (int a = 0; a < gradOutput.Length; ++a)
                     {
-                        for (int b = 0; b < derivOutput[a].Length; ++b)
+                        for (int b = 0; b < gradOutput[a].Length; ++b)
                         {
-                            res += derivOutput[a][b] * inputForKernelLayer[i + a][j + b];
+                            res += gradOutput[a][b] * inputForKernelLayer[i + a][j + b];
                         }
                     }
-                    gradientToReturn[i][j] = res;
+                    Kernels[kernelIndex][kernelLayerIndex][i][j] += res;
                 }
             }
-
-            return gradientToReturn;
-
         }
 
+        private void FindInputGradientAndUpdate(double[][] kernelsCopy, double[][] gradOutput, int kernelIndex, int i, double[][] gradientForInput)
+        {
+            
+        }
         #endregion
     }
 }
