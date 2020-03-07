@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using NeuralNetwork.Extensions;
 using NeuralNetwork.Helpers;
@@ -101,15 +102,19 @@ namespace NeuralNetwork.Components
                 listToReturn.Add(ArrayHelper.Matrix(sizeOfLastInput, sizeOfLastInput, 0));
             }
 
+            //if all kerenels in this layer is the same size
+            //bottleneck of this implementation
+            var resizedOutputMapsGradient = outputMapsGradient.Select(item => ArrayHelper.IncreaseAllSides(item, KernelSize - 1)).ToList();
+
             for (int i = 0; i < outputMapsGradient.Count; i++)
             {
-                ProcessGradientMap(outputMapsGradient[i], listToReturn, i);
+                ProcessGradientMap(outputMapsGradient[i], resizedOutputMapsGradient[i], listToReturn, i);
             }
 
             return listToReturn;
         }
 
-        public void ProcessGradientMap(double[][] outputMapGradient, List<double[][]> gradientForInput, int kernelIndex)
+        public void ProcessGradientMap(double[][] outputMapGradient, double[][] resizedOutputMapGradient, List<double[][]> gradientForInput, int kernelIndex)
         {
             var kernelsCopy = Kernels[kernelIndex].DeepCopy();
 
@@ -120,17 +125,22 @@ namespace NeuralNetwork.Components
 
             for (int i = 0; i < Kernels[kernelIndex].Length; ++i)
             {
-                FindInputGradientAndUpdate(kernelsCopy[i], outputMapGradient, kernelIndex, i, gradientForInput[i]);
+                FindInputGradientAndUpdate(kernelsCopy[i], resizedOutputMapGradient, gradientForInput[i]);
             }
 
         }
+
 
         #endregion
 
         #region Private Methods
 
         ///Find gradient for one of kernel matrixes  and update
-        private void FindKernelGradientAndUpdate(double[][] inputForKernelLayer, double[][] gradOutput, int kernelIndex, int kernelLayerIndex)
+        private void FindKernelGradientAndUpdate(
+            double[][] inputForKernelLayer,
+            double[][] gradOutput,
+            int kernelIndex,
+            int kernelLayerIndex)
         {
             //just simple convolution with weight update 
             for (int i = 0; i < KernelSize; ++i)
@@ -150,10 +160,29 @@ namespace NeuralNetwork.Components
             }
         }
 
-        private void FindInputGradientAndUpdate(double[][] kernelsCopy, double[][] gradOutput, int kernelIndex, int i, double[][] gradientForInput)
+        //Find gradient for input map
+        private void FindInputGradientAndUpdate(
+            double[][] kernelsCopy,
+            double[][] resizedOutputMapGradient,
+            double[][] gradientForInput)
         {
-            
+            for (int i = 0; i < gradientForInput.Length; ++i)
+            {
+                for (int j = 0; j < gradientForInput[i].Length; ++j)
+                {
+                    double res = 0;
+                    for (int a = 0; a < KernelSize; ++a)
+                    {
+                        for (int b = 0; b < KernelSize; ++b)
+                        {
+                            res += kernelsCopy[i][j] * resizedOutputMapGradient[i + a][j + b];
+                        }
+                    }
+                    gradientForInput[i][j] += res;
+                }
+            }
         }
+
         #endregion
     }
 }

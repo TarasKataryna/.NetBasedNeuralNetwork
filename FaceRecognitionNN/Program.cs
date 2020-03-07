@@ -15,9 +15,10 @@ namespace FaceRecognitionNN
     {
         static void Main(string[] args)
         {
-            var b = ArrayHelper.Matrix(3, 3, 0);
-            Pr(b);
-            b.Show();
+            var b = ArrayHelper.Matrix(4, 4, 5);
+            //Pr(b);
+            var c = ArrayHelper.IncreaseAllSides(b, 4);
+            c.Show();
             /*var a = ProcessMap();
             a.Show();*/
             Console.Read();
