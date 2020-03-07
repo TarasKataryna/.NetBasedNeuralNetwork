@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+
+using NeuralNetwork.Helpers;
 
 namespace NeuralNetwork.Components
 {
     public class PollingLayer
     {
+        #region Properties
+
         public int KernelSize { get; set; }
 
         public int KernelPadding { get; set; }
@@ -19,8 +22,14 @@ namespace NeuralNetwork.Components
             KernelStride = kernelStride;
         }
 
+        public List<double[][]> LastInput { get; set; }
+
+        #endregion
+
         public List<double[][]> ProcessMaps(List<double[][]> maps)
         {
+            LastInput = maps;
+
             var listToReturn = new  List<double[][]>();
             for(int i = 0; i < maps.Count; ++i)
             {
@@ -32,7 +41,7 @@ namespace NeuralNetwork.Components
 
         public double[][] ProcessMap(double[][] map)
         {
-            int featureMapSize = (map.Length - KernelSize + 2 * KernelPadding) / KernelStride + 1;
+            int featureMapSize = map.Length / 2;
             var mapToReturn = new double[featureMapSize][];
 
             for(int i = 0; i < featureMapSize; i++)
@@ -40,14 +49,16 @@ namespace NeuralNetwork.Components
                 mapToReturn[i] = new double[featureMapSize];
                 for(int j = 0; j < featureMapSize; ++j)
                 {
-                    double max = map[i][j];
+                    int indexJ = j * 2;
+                    int indexI = i * 2;
+                    double max = map[indexI][indexJ];
                     for (int a = 0; a < KernelSize; ++a)
                     {
                         for (int b = 0; b < KernelSize; ++b)
                         {
-                            if(max < map[i + a][j + b])
+                            if(max < map[indexI + a][indexJ + b])
                             {
-                                max = map[i + a][j + b];
+                                max = map[indexI + a][indexJ + b];
                             }
                         }
                     }
@@ -56,6 +67,48 @@ namespace NeuralNetwork.Components
             }
 
             return mapToReturn;
+        }
+
+
+        public List<double[][]> ProcessBackpropMaps(List<double[][]> maps)
+        {
+            //maps - matrixes, that return ProcessBackpropMaps of ConvLayer
+
+            var listToReturn = new List<double[][]>();
+
+
+            return listToReturn;
+        }
+
+        public double[][] ProcessBackpropMap(double[][] map)
+        {
+            int lastInputSize = LastInput[0].Length;
+
+            var toReturn = ArrayHelper.ZeroMatrix(lastInputSize, lastInputSize);
+
+            for (int i = 0; i < lastInputSize; i++)
+            {
+                for (int j = 0; j < lastInputSize; ++j)
+                {
+                    double max = map[i][j];
+                    int indexI = i;
+                    int indexJ = j;
+                    for (int a = 0; a < KernelSize; ++a)
+                    {
+                        for (int b = 0; b < KernelSize; ++b)
+                        {
+                            if (max < map[i + a][j + b])
+                            {
+                                max = map[i + a][j + b];
+                                indexI = i + a;
+                                indexJ = j + b;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return toReturn;
         }
     }
 }

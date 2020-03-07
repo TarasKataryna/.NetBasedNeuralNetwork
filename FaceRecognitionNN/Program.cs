@@ -15,12 +15,16 @@ namespace FaceRecognitionNN
     {
         static void Main(string[] args)
         {
-            var b = ArrayHelper.Matrix(4, 4, 5);
-            //Pr(b);
-            var c = ArrayHelper.IncreaseAllSides(b, 4);
-            c.Show();
-            /*var a = ProcessMap();
-            a.Show();*/
+            var b = new double[][] { 
+                new double[]{1,2,1,2,1,2 },
+                new double[]{3,4,5,6,7,8 },
+                new double[]{3,4,5,6,7,8 },
+                new double[]{6,5,4,10,2,1 },
+                new double[]{6,56,12,10,2,1 },
+                new double[]{6,5,4,11,90,1 },
+            };
+            var a = ProcessMapPooling(b);
+            a.Show();
             Console.Read();
         }
 
@@ -72,6 +76,36 @@ namespace FaceRecognitionNN
             }
 
             return featureMap;
+        }
+
+        public static double[][] ProcessMapPooling(double[][] map)
+        {
+            int featureMapSize = map.Length / 2;
+            var mapToReturn = new double[featureMapSize][];
+
+            for (int i = 0; i < featureMapSize; i++)
+            {
+                mapToReturn[i] = new double[featureMapSize];
+                for (int j = 0; j < featureMapSize; ++j)
+                {
+                    int indexJ = j * 2;
+                    int indexI = i * 2;
+                    double max = map[indexI][indexJ];
+                    for (int a = 0; a < 2; ++a)
+                    {
+                        for (int b = 0; b < 2; ++b)
+                        {
+                            if (max < map[indexI + a][indexJ + b])
+                            {
+                                max = map[indexI + a][indexJ + b];
+                            }
+                        }
+                    }
+                    mapToReturn[i][j] = max;
+                }
+            }
+
+            return mapToReturn;
         }
 
     }
