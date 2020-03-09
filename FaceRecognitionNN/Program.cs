@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
-using NeuralNetwork;
+using NeuralNetwork.Components;
 using NeuralNetwork.Helpers;
 using NeuralNetwork.Extensions;
 
@@ -23,8 +23,14 @@ namespace FaceRecognitionNN
                 new double[]{6,56,12,10,2,1 },
                 new double[]{6,5,4,11,90,1 },
             };
-            var a = ProcessMapPooling(b);
-            a.Show();
+
+            var a = new FlattenLayer();
+            var c = a.ProcessMaps(new List<double[][]> {b});
+            for(int i = 0; i < c.Length; ++i)
+            {
+                Console.Write(c[i]);
+                Console.Write(' ');
+            }
             Console.Read();
         }
 

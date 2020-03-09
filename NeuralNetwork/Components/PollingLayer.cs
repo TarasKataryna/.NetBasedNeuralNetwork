@@ -76,6 +76,10 @@ namespace NeuralNetwork.Components
 
             var listToReturn = new List<double[][]>();
 
+            for(int i = 0; i < maps.Count; ++i)
+            {
+                listToReturn.Add(ProcessBackpropMap(maps[i]));
+            }
 
             return listToReturn;
         }
@@ -86,25 +90,29 @@ namespace NeuralNetwork.Components
 
             var toReturn = ArrayHelper.ZeroMatrix(lastInputSize, lastInputSize);
 
-            for (int i = 0; i < lastInputSize; i++)
+            for (int i = 0; i < map.Length; i++)
             {
-                for (int j = 0; j < lastInputSize; ++j)
+                for (int j = 0; j < map[i].Length; ++j)
                 {
-                    double max = map[i][j];
-                    int indexI = i;
-                    int indexJ = j;
+                    int indexJ = j * 2;
+                    int indexI = i * 2;
+
+                    int iOfMax = indexI;
+                    int jOfMax = indexJ;
+                    double max = map[indexI][indexJ];
                     for (int a = 0; a < KernelSize; ++a)
                     {
                         for (int b = 0; b < KernelSize; ++b)
                         {
-                            if (max < map[i + a][j + b])
+                            if (max < map[indexI + a][indexJ + b])
                             {
-                                max = map[i + a][j + b];
-                                indexI = i + a;
-                                indexJ = j + b;
+                                max = map[indexI + a][indexJ + b];
+                                iOfMax = indexI + a;
+                                jOfMax = indexJ + b;
                             }
                         }
                     }
+                    toReturn[iOfMax][indexJ] = map[i][j];
                 }
             }
 
