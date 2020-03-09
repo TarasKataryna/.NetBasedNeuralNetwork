@@ -24,19 +24,16 @@ namespace FaceRecognitionNN
                 new double[]{6,5,4,11,90,1 },
             };
 
-            var a = new FlattenLayer();
-            var c = a.ProcessMaps(new List<double[][]> {b});
-            for(int i = 0; i < c.Length; ++i)
-            {
-                Console.Write(c[i]);
-                Console.Write(' ');
-            }
+            var a = b.DeepCopy();
+            Pr(b);
+            a.Show();
+
             Console.Read();
         }
 
         public static void Pr(double[][] a)
         {
-            a[0][0] = 1;
+            a[0][0] = 7;
         }
 
         public static  double[][] ProcessMap()

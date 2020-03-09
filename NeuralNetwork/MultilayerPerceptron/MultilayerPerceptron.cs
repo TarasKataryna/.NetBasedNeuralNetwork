@@ -33,6 +33,7 @@ namespace NeuralNetwork.MultilayerPerceptron
             Layers.Add(layer);
         }
 
+        //vectorized train
         public void Train(float learningRate, int epochCounts, double[][] inputData, double[][] inputResults, int batchSize, bool toShuffle)
         {
             for(int i = 0; i < epochCounts; ++i)
@@ -55,8 +56,8 @@ namespace NeuralNetwork.MultilayerPerceptron
             var delta = CostFunctionDerivative(Layers[Layers.Count - 1].Output, inputResults)
                 .Dot(Layers[Layers.Count - 1].ActivateFuncDerivative(Layers[Layers.Count - 1].Output));
 
-            var prevDelta = delta.Clone() as double[][];
-            var prevW = Layers[Layers.Count - 1].Weights.WeightsArr.Clone() as double[][];
+            var prevDelta = delta.DeepCopy();
+            var prevW = Layers[Layers.Count - 1].Weights.WeightsArr.DeepCopy();
 
             var deltaW = Layers[Layers.Count - 2].Output.Dot(delta);
 
@@ -66,14 +67,40 @@ namespace NeuralNetwork.MultilayerPerceptron
             for(int i = Layers.Count - 2; i > 0; --i)
             {
                 delta = prevW.Transpose().Dot(prevDelta).Multiple(Layers[i].ActivateFuncDerivative(Layers[i].Output));
-                prevDelta = delta.Clone() as double[][];
+                prevDelta = delta.DeepCopy();
 
-                prevW = Layers[i].Weights.WeightsArr.Clone() as double[][];
+                prevW = Layers[i].Weights.WeightsArr.DeepCopy();
                 deltaW = Layers[i].Output.Dot(delta);
 
                 Layers[i].Weights.WeightsArr = Layers[i].Weights.WeightsArr.Add(deltaW).Multiple(learningRate);
             }
 
+        }
+
+
+        //SGD train
+
+        public void SGDTrain(
+            double learningRate,
+            int epochs,
+            double[] input,
+            double[] inputResults,
+            double lossEps)
+        {
+            for(int i = 0; i < epochs; ++i)
+            {
+                var loss = SGDStep(learningRate, input, inputResults);
+                if(loss < lossEps)
+                {
+                    break;
+                }
+            }
+        }
+
+        public double SGDStep(double learningRate, double[] input,double[] inputResults)
+        {
+            var loss = 0;
+            return loss;
         }
 
         #endregion
