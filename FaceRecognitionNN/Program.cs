@@ -15,19 +15,7 @@ namespace FaceRecognitionNN
     {
         static void Main(string[] args)
         {
-            var b = new double[][] { 
-                new double[]{1,2,1,2,1,2 },
-                new double[]{3,4,5,6,7,8 },
-                new double[]{3,4,5,6,7,8 },
-                new double[]{6,5,4,10,2,1 },
-                new double[]{6,56,12,10,2,1 },
-                new double[]{6,5,4,11,90,1 },
-            };
-
-            var a = b.DeepCopy();
-            Pr(b);
-            a.Show();
-
+            var a = ArrayHelper.Matrix(5, 5, 7);            
             Console.Read();
         }
 
