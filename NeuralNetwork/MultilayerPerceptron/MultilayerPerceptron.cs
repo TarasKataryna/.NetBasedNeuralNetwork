@@ -1,7 +1,9 @@
-﻿using NeuralNetwork.Components;
-using NeuralNetwork.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+
+using NeuralNetwork.Components;
+using NeuralNetwork.Extensions;
 
 namespace NeuralNetwork.MultilayerPerceptron
 {
@@ -10,19 +12,20 @@ namespace NeuralNetwork.MultilayerPerceptron
 
         #region Properties
 
-        public int LayersCount
-        {
-            get
-            {
-                return InputLayer != null ? Layers.Count + 1 : 0;
-            }
-        }
+        public int LayersCount => Layers != null ? Layers.Count : 0;
+
+        public Layer OutputLayer => Layers != null ? Layers[LayersCount - 1] : null;
 
         public List<Layer> Layers { get; set; }
 
-        public InputLayer InputLayer { get; set; }
+        #endregion
 
+        #region constructor
 
+        public MultilayerPerceptron(List<Layer> layers)
+        {
+            Layers = layers;
+        }
 
         #endregion
 
@@ -36,7 +39,7 @@ namespace NeuralNetwork.MultilayerPerceptron
         //vectorized train
         public void Train(float learningRate, int epochCounts, double[][] inputData, double[][] inputResults, int batchSize, bool toShuffle)
         {
-            for(int i = 0; i < epochCounts; ++i)
+            for (int i = 0; i < epochCounts; ++i)
             {
                 if (toShuffle)
                 {
@@ -57,22 +60,22 @@ namespace NeuralNetwork.MultilayerPerceptron
                 .Dot(Layers[Layers.Count - 1].ActivateFuncDerivative(Layers[Layers.Count - 1].Output));
 
             var prevDelta = delta.DeepCopy();
-            var prevW = Layers[Layers.Count - 1].Weights.WeightsArr.DeepCopy();
+            var prevW = Layers[Layers.Count - 1].Weights.DeepCopy();
 
             var deltaW = Layers[Layers.Count - 2].Output.Dot(delta);
 
-            
-            Layers[Layers.Count - 1].Weights.WeightsArr = Layers[Layers.Count - 1].Weights.WeightsArr.Add(deltaW).Multiple(learningRate);
 
-            for(int i = Layers.Count - 2; i > 0; --i)
+            Layers[Layers.Count - 1].Weights = Layers[Layers.Count - 1].Weights.Add(deltaW).Multiple(learningRate);
+
+            for (int i = Layers.Count - 2; i > 0; --i)
             {
                 delta = prevW.Transpose().Dot(prevDelta).Multiple(Layers[i].ActivateFuncDerivative(Layers[i].Output));
                 prevDelta = delta.DeepCopy();
 
-                prevW = Layers[i].Weights.WeightsArr.DeepCopy();
+                prevW = Layers[i].Weights.DeepCopy();
                 deltaW = Layers[i].Output.Dot(delta);
 
-                Layers[i].Weights.WeightsArr = Layers[i].Weights.WeightsArr.Add(deltaW).Multiple(learningRate);
+                Layers[i].Weights = Layers[i].Weights.Add(deltaW).Multiple(learningRate);
             }
 
         }
@@ -85,22 +88,113 @@ namespace NeuralNetwork.MultilayerPerceptron
             int epochs,
             double[] input,
             double[] inputResults,
-            double lossEps)
+            double lossEps,
+            int inputDataCount)
         {
-            for(int i = 0; i < epochs; ++i)
+            for (int i = 0; i < epochs; ++i)
             {
-                var loss = SGDStep(learningRate, input, inputResults);
-                if(loss < lossEps)
+                for (int j = 0; j < inputDataCount; ++j)
                 {
-                    break;
+                    var loss = SGDStep(learningRate, input, inputResults);
+                    var results = loss.Item2;
+                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss.Item1}, prediction - {results.ToList().IndexOf(results.Max())}");
+                    if (loss.Item1 < lossEps)
+                    {
+                        break;
+                    }
                 }
             }
         }
 
-        public double SGDStep(double learningRate, double[] input,double[] inputResults)
+        public Tuple<double, double[]> SGDStep(double learningRate, double[] input, double[] inputResults)
         {
-            var loss = 0;
-            return loss;
+            var loss = .0;
+
+            //feedforward
+            Layers.ForEach(layer =>
+            {
+                layer.Activate(layer.Sum(input));
+            });
+
+            //calculating loss
+            for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
+            {
+                loss += (OutputLayer.OutputNonMatrix[i] - inputResults[i]) / 2;
+            }
+            loss /= OutputLayer.NeuronsCount;
+
+            //backprop
+            var prevWeight = OutputLayer.Weights.DeepCopy();
+            var layerGradient = new double[OutputLayer.NeuronsCount];
+
+            //last layer
+            for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
+            {
+                layerGradient[i] = (inputResults[i] - OutputLayer.OutputNonMatrix[i])
+                    * OutputLayer.ActivateFunctionDerivative(OutputLayer.SumOutputNonMatrix[i]);
+            }
+            for (int i = 0; i < OutputLayer.WeightRowsCount; ++i)
+            {
+                for (int j = 0; j < OutputLayer.WeightColumnsCount; ++j)
+                {
+                    var gradientWeight = layerGradient[i] * Layers[LayersCount - 2].OutputNonMatrix[i];
+                    OutputLayer.Weights[i][j] += learningRate * gradientWeight;
+                }
+            }
+
+            //hidden layers
+            double[] prevLayerGradient;
+            for (int k = LayersCount - 2; k > 0; ++k)
+            {
+                prevLayerGradient = layerGradient.DeepCopy();
+                layerGradient = new double[Layers[k].NeuronsCount];
+                for (int i = 0; i < Layers[k].NeuronsCount; ++i)
+                {
+                    layerGradient[i] = .0;
+                    for (int j = 0; j < Layers[k + 1].NeuronsCount; ++j)
+                    {
+                        layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
+                    }
+                    layerGradient[i] *= Layers[k].ActivateFunctionDerivative(Layers[k].SumOutputNonMatrix[i]);
+                }
+
+                prevWeight = Layers[k].Weights.DeepCopy();
+
+                for (int i = 0; i < Layers[k].WeightRowsCount; ++i)
+                {
+                    for (int j = 0; j < Layers[k].WeightColumnsCount; ++j)
+                    {
+                        var gradientWeight = layerGradient[i] * Layers[k - 1].OutputNonMatrix[i];
+                        Layers[k].Weights[i][j] += learningRate * gradientWeight;
+                    }
+                }
+            }
+
+            //first layer
+            prevLayerGradient = layerGradient.DeepCopy();
+            layerGradient = new double[Layers[0].NeuronsCount];
+            for (int i = 0; i < Layers[0].NeuronsCount; ++i)
+            {
+                layerGradient[i] = .0;
+                for (int j = 0; j < Layers[1].NeuronsCount; ++j)
+                {
+                    layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
+                }
+                layerGradient[i] *= Layers[0].ActivateFunctionDerivative(Layers[0].SumOutputNonMatrix[i]);
+            }
+
+            prevWeight = Layers[0].Weights.DeepCopy();
+
+            for (int i = 0; i < Layers[0].WeightRowsCount; ++i)
+            {
+                for (int j = 0; j < Layers[0].WeightColumnsCount; ++j)
+                {
+                    var gradientWeight = layerGradient[i] * input[i];
+                    Layers[0].Weights[i][j] += learningRate * gradientWeight;
+                }
+            }
+
+            return new Tuple<double, double[]>(loss, OutputLayer.OutputNonMatrix);
         }
 
         #endregion

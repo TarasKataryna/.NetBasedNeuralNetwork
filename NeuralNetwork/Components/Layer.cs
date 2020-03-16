@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 
 using NeuralNetwork.Interfaces;
 using NeuralNetwork.Extensions;
@@ -9,19 +10,26 @@ namespace NeuralNetwork.Components
     {
         public int NeuronsCount { get; set; }
 
-        public Weights Weights { get; set; }
+
+        public double[][] Weights { get; set; }
+
+        public int WeightRowsCount => Weights != null ? Weights.Length : 0;
+
+        public int WeightColumnsCount => Weights != null ? Weights[0].Length : 0;
 
         public double[][] Output { get; set; }
 
         public double[] OutputNonMatrix { get; set; }
 
+        public double[] SumOutputNonMatrix { get; set; }
+
         public ActivateFunction AcivateFunc { get; set; }
 
         public ActivateFunction ActivateFunctionDerivative { get; set; }
 
-        public Layer(int neuronsCount, Weights weights, ActivateFunction func)
+        public Layer(int neuronsCount, double[][] weights, ActivateFunction func)
         {
-            if(neuronsCount != weights.N)
+            if(neuronsCount != weights.Length)
             {
                 throw new Exception("Size of weights and neurons count is not right, please make changes");
             }
@@ -35,7 +43,7 @@ namespace NeuralNetwork.Components
 
         public double[][] Sum(double[][] input)
         {
-            return input.Dot(Weights.WeightsArr);
+            return input.Dot(Weights);
         }
 
         public double[][] Activate(double[][] sum)
@@ -72,7 +80,8 @@ namespace NeuralNetwork.Components
 
         public double[] Sum(double[] input)
         {
-            return input.Dot(this.Weights.WeightsArr);
+            SumOutputNonMatrix = input.Dot(this.Weights);
+            return SumOutputNonMatrix;
         }
 
         public double[] Activate(double[] sum)
@@ -82,6 +91,7 @@ namespace NeuralNetwork.Components
                 sum[i] = AcivateFunc(sum[i]);
             }
 
+            OutputNonMatrix = sum;
             return sum;
         }
 

@@ -5,6 +5,8 @@ namespace NeuralNetwork.Extensions
 {
     public static class ArrayExtension
     {
+        #region math operations
+
         public static double[][] Transpose(this double[][] array)
         {
             double[][] toReturn = new double[array.Length][];
@@ -58,7 +60,7 @@ namespace NeuralNetwork.Extensions
                 double res = 0;
                 for(int j = 0; j < array.Length; ++j)
                 {
-                    res += array[j] + toMultiple[j][i];
+                    res += array[j] * toMultiple[j][i];
                 }
 
                 toReturn[i] = res;
@@ -85,7 +87,6 @@ namespace NeuralNetwork.Extensions
 
             return toReturn;
         }
-
 
         public static double[][] Sub(this double[][] matr, double[][] toSub)
         {
@@ -116,6 +117,8 @@ namespace NeuralNetwork.Extensions
 
             return toReturn;
         }
+
+        #endregion
 
         public static void Shuffle(this double[][] a)
         {
@@ -182,6 +185,13 @@ namespace NeuralNetwork.Extensions
             } 
         }
 
+        #region copy operations
+
+        public static double[] DeepCopy(this double[] arr)
+        {
+            return (double[])arr.Clone();
+        }
+
         public static double[][] DeepCopy(this double[][] first)
         {
             var ret = new double[first.Length][];
@@ -205,5 +215,12 @@ namespace NeuralNetwork.Extensions
             }
             return ret;
         }
+        #endregion
+
+        public static void ForEach(this double[] arr, Action<double> action)
+        {
+            Array.ForEach(arr, action);
+        }
+
     }
 }

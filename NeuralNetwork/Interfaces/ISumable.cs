@@ -4,7 +4,7 @@ namespace NeuralNetwork.Interfaces
 {
     public interface ISumable : ILayer
     {
-        Weights Weights { get; set; }
+        double[][] Weights { get; set; }
 
         double[][] Sum(double[][] vectorizedInput);
 
