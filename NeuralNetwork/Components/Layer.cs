@@ -27,7 +27,7 @@ namespace NeuralNetwork.Components
 
         public ActivateFunction ActivateFunctionDerivative { get; set; }
 
-        public Layer(int neuronsCount, double[][] weights, ActivateFunction func)
+        public Layer(int neuronsCount, double[][] weights, ActivateFunction func, ActivateFunction funcDerivative)
         {
             if(neuronsCount != weights.Length)
             {
@@ -35,6 +35,7 @@ namespace NeuralNetwork.Components
             }
 
             this.AcivateFunc = func;
+            this.ActivateFunctionDerivative = funcDerivative;
             this.NeuronsCount = neuronsCount;
             this.Weights = weights;
         }

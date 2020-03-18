@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+
 using NeuralNetwork.Components;
 using NeuralNetwork.Helpers;
 using NeuralNetwork.Extensions;
+using NeuralNetwork.Factory;
+using NeuralNetwork.Networks;
 
 namespace FaceRecognitionNN
 {
@@ -15,88 +21,15 @@ namespace FaceRecognitionNN
     {
         static void Main(string[] args)
         {
-            var a = ArrayHelper.Matrix(5, 5, 7);            
-            Console.Read();
-        }
-
-        public static void Pr(double[][] a)
-        {
-            a[0][0] = 7;
-        }
-
-        public static  double[][] ProcessMap()
-        {
-            List<double[][]> maps = new List<double[][]>
-            {
-                 ArrayHelper.Matrix(7,7,1),
-                ArrayHelper.Matrix(7,7,1),
-                ArrayHelper.Matrix(7,7,1)
-            };
-
-            var Kernels = new List<double[][][]>
-            {
-                new double[][][]{
-                ArrayHelper.Matrix(3,3,1),
-                ArrayHelper.Matrix(3,3,1),
-                ArrayHelper.Matrix(3,3,1)
-                }
-            };
-
-            var featureMapSize = 4;
-            var filterIndex = 0;
-
-            var featureMap = ArrayHelper.Matrix(featureMapSize, featureMapSize, 0);
-
-            for (int depth = 0; depth < 3; ++depth)
-            {
-                for (int i = 0; i < featureMapSize; ++i)
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
                 {
-                    for (int j = 0; j < featureMapSize; ++j)
-                    {
-                        double res = 0;
-                        for (int a = 0; a < 3; ++a)
-                        {
-                            for (int b = 0; b < 3; ++b)
-                            {
-                                res += Kernels[filterIndex][depth][a][b] * maps[depth][i + a][j + b];
-                            }
-                        }
-                        featureMap[i][j] += res;
-                    }
-                }
-            }
+                    services.AddHostedService<StartUp>();
+                    services.AddTransient<IFactory,MultilayerPerceptronFactory>();
+                })
+                .Build();
 
-            return featureMap;
-        }
-
-        public static double[][] ProcessMapPooling(double[][] map)
-        {
-            int featureMapSize = map.Length / 2;
-            var mapToReturn = new double[featureMapSize][];
-
-            for (int i = 0; i < featureMapSize; i++)
-            {
-                mapToReturn[i] = new double[featureMapSize];
-                for (int j = 0; j < featureMapSize; ++j)
-                {
-                    int indexJ = j * 2;
-                    int indexI = i * 2;
-                    double max = map[indexI][indexJ];
-                    for (int a = 0; a < 2; ++a)
-                    {
-                        for (int b = 0; b < 2; ++b)
-                        {
-                            if (max < map[indexI + a][indexJ + b])
-                            {
-                                max = map[indexI + a][indexJ + b];
-                            }
-                        }
-                    }
-                    mapToReturn[i][j] = max;
-                }
-            }
-
-            return mapToReturn;
+            host.Run();
         }
 
     }
