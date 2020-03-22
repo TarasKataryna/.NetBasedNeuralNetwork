@@ -7,7 +7,7 @@ using NeuralNetwork.Extensions;
 
 namespace NeuralNetwork.Networks
 {
-    public class MultilayerPerceptron : Network 
+    public class MultilayerPerceptron : Network
     {
 
         #region Properties
@@ -83,27 +83,35 @@ namespace NeuralNetwork.Networks
 
         //SGD train
 
-        public void SGDTrain(
+        public List<double> SGDTrain(
             double learningRate,
             int epochs,
-            double[] input,
-            double[] inputResults,
+            double[][] input,
+            double[][] inputResults,
             double lossEps,
             int inputDataCount)
         {
+            var toReturn = new List<double>();
+
             for (int i = 0; i < epochs; ++i)
             {
                 for (int j = 0; j < inputDataCount; ++j)
                 {
-                    var loss = SGDStep(learningRate, input, inputResults);
-                    var results = loss.Item2;
-                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss.Item1}, prediction - {results.ToList().IndexOf(results.Max())}");
-                    if (loss.Item1 < lossEps)
+                    var loss = SGDStep(learningRate, input[j], inputResults[j]);
+
+                    var results = OutputLayer.OutputNonMatrix.ToList();
+
+                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss.Item1}, prediction - {results.IndexOf(results.Max())}, actual result - {Array.IndexOf(inputResults[j], inputResults[j].Max())}");
+
+                    toReturn.Add(Math.Abs(loss.Item1));
+                    if (Math.Abs(loss.Item1) < lossEps)
                     {
                         break;
                     }
                 }
             }
+
+            return toReturn;
         }
 
         public Tuple<double, double[]> SGDStep(double learningRate, double[] input, double[] inputResults)
@@ -111,10 +119,12 @@ namespace NeuralNetwork.Networks
             var loss = .0;
 
             //feedforward
-            Layers.ForEach(layer =>
+            double[] lastOut = input;
+            for (int i = 0; i < Layers.Count; ++i)
             {
-                layer.Activate(layer.Sum(input));
-            });
+                Layers[i].Activate(Layers[i].Sum(lastOut));
+                lastOut = Layers[i].OutputNonMatrix;
+            }
 
             //calculating loss
             for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
@@ -155,30 +165,6 @@ namespace NeuralNetwork.Networks
                     prevLayerGradient = layerGradient.DeepCopy();
                     layerGradient = new double[Layers[k].NeuronsCount];
                     FindGradientAndUpdateWeights(layerGradient, learningRate, k, ref prevWeight, prevLayerGradient: prevLayerGradient);
-
-                    #region comments
-
-                    /*for (int i = 0; i < Layers[k].NeuronsCount; ++i)
-                    {
-                        layerGradient[i] = .0;
-                        for (int j = 0; j < Layers[k + 1].NeuronsCount; ++j)
-                        {
-                            layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
-                        }
-                        layerGradient[i] *= Layers[k].ActivateFunctionDerivative(Layers[k].SumOutputNonMatrix[i]);
-                    }
-
-                    prevWeight = Layers[k].Weights.DeepCopy();
-
-                    for (int i = 0; i < Layers[k].WeightRowsCount; ++i)
-                    {
-                        for (int j = 0; j < Layers[k].WeightColumnsCount; ++j)
-                        {
-                            var gradientWeight = layerGradient[i] * Layers[k - 1].OutputNonMatrix[i];
-                            Layers[k].Weights[i][j] += learningRate * gradientWeight;
-                        }
-                    }*/
-                    #endregion
                 }
             }
 
@@ -187,30 +173,10 @@ namespace NeuralNetwork.Networks
             layerGradient = new double[Layers[0].NeuronsCount];
             FindGradientAndUpdateWeights(layerGradient, learningRate, 0, ref prevWeight, prevLayerGradient: prevLayerGradient, input: input);
 
-            #region comments
-            /*for (int i = 0; i < Layers[0].NeuronsCount; ++i)
-            {
-                layerGradient[i] = .0;
-                for (int j = 0; j < Layers[1].NeuronsCount; ++j)
-                {
-                    layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
-                }
-                layerGradient[i] *= Layers[0].ActivateFunctionDerivative(Layers[0].SumOutputNonMatrix[i]);
-            }
+            prevLayerGradient = layerGradient.DeepCopy();
+            var inputLayerGradient = GetInputLayerGradient(input, prevLayerGradient,ref  prevWeight);
 
-            prevWeight = Layers[0].Weights.DeepCopy();
-
-            for (int i = 0; i < Layers[0].WeightRowsCount; ++i)
-            {
-                for (int j = 0; j < Layers[0].WeightColumnsCount; ++j)
-                {
-                    var gradientWeight = layerGradient[i] * input[i];
-                    Layers[0].Weights[i][j] += learningRate * gradientWeight;
-                }
-            }*/
-            #endregion
-
-            return new Tuple<double, double[]>(loss, OutputLayer.OutputNonMatrix);
+            return new Tuple<double, double[]>(loss, inputLayerGradient);
         }
 
         #endregion
@@ -223,7 +189,7 @@ namespace NeuralNetwork.Networks
         }
 
         private void FindGradientAndUpdateWeights(
-            double[] layerGradient, 
+            double[] layerGradient,
             double learningRate,
             int layerIndex,
             ref double[][] prevWeight,
@@ -231,7 +197,7 @@ namespace NeuralNetwork.Networks
             double[] input = null,
             double[] prevLayerGradient = null)
         {
-            if (layerIndex == LayersCount-1)
+            if (layerIndex == LayersCount - 1)
             {
                 for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
                 {
@@ -260,7 +226,7 @@ namespace NeuralNetwork.Networks
                 {
                     for (int j = 0; j < Layers[layerIndex].WeightColumnsCount; ++j)
                     {
-                        var gradientWeight = layerGradient[i] * Layers[layerIndex - 1].OutputNonMatrix[i];
+                        var gradientWeight = layerGradient[j] * Layers[layerIndex - 1].OutputNonMatrix[i];
                         Layers[layerIndex].Weights[i][j] += learningRate * gradientWeight;
                     }
                 }
@@ -271,11 +237,31 @@ namespace NeuralNetwork.Networks
                 {
                     for (int j = 0; j < Layers[0].WeightColumnsCount; ++j)
                     {
-                        var gradientWeight = layerGradient[i] * input[i];
+                        var gradientWeight = layerGradient[j] * input[i];
                         Layers[0].Weights[i][j] += learningRate * gradientWeight;
                     }
                 }
             }
+        }
+
+        private double[] GetInputLayerGradient(double[] input, double[] prevLayerGradient, ref double[][] prevWeight)
+        {
+            //It's not fully computed gradient 
+            //because we don't know about activate function in flatten layer
+            
+            //We have to multiple each item of this gradient on activate function gradient in our cnn
+
+            var layerGradient = new double[input.Length];
+            for (int i = 0; i < input.Length; ++i)
+            {
+                layerGradient[i] = .0;
+                for (int j = 0; j < prevLayerGradient.Length; ++j)
+                {
+                    layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
+                }
+            }
+
+            return layerGradient;
         }
         #endregion
     }

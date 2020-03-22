@@ -54,8 +54,8 @@ namespace NeuralNetwork.Extensions
 
         public static double[] Dot(this double[] array, double[][] toMultiple)
         {
-            double[] toReturn = new double[array.Length];
-            for(int i = 0; i < toMultiple.Length; ++i)
+            double[] toReturn = new double[toMultiple[0].Length];
+            for(int i = 0; i < toMultiple[0].Length; ++i)
             {
                 double res = 0;
                 for(int j = 0; j < array.Length; ++j)

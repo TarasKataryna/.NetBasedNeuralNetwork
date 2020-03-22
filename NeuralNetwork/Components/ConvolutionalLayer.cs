@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using NeuralNetwork.Extensions;
 using NeuralNetwork.Helpers;
+using NeuralNetwork.Interfaces;
 
 namespace NeuralNetwork.Components
 {
-    public class ConvolutionalLayer
+    public class ConvolutionalLayer : IConvLayer
     {
         #region Properties
 
@@ -22,10 +22,6 @@ namespace NeuralNetwork.Components
         public int KernelStride { get; set; }
 
         public int KernelDepth => Kernels != null ? Kernels[0].Length : 0;
-
-        public int Stride { get; set; }
-
-        public int Padding { get; set; }
 
         public List<double[][]> LastInput { get; set; }
 

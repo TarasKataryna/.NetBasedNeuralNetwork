@@ -1,14 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using NeuralNetwork.Extensions;
+using static NeuralNetwork.Common;
 
 namespace NeuralNetwork.Components
 {
     public class FlattenLayer
     {
+        public int KernelSize => 1;
+
+        public int KernelPadding => 0;
+
+        public int KernelStride => 1;
+
         public int LastInputKernelSize { get; set; }
 
         public int LastInputListSize { get; set; }
+
+        public ActivateFunction ActivateFunction { get; set; }
+
+        public ActivateFunction ActivateFunctionDerivative { get; set; }
 
         public double[] ProcessMaps(List<double[][]> maps)
         {
@@ -25,12 +37,18 @@ namespace NeuralNetwork.Components
                     Array.Copy(maps[i][j], 0, toReturn, j * maps[i].Length, maps[i].Length);
                 }
             }
+
+            ActivateAll(toReturn);
+
             return toReturn;
         }
 
         public List<double[][]> ProcessBackpropMaps(double[] gradients)
         {
             var toReturn = new List<double[][]>();
+
+            //here we continue computing gradient multiplying on activate function derivative
+            gradients = gradients.Select(item => ActivateFunctionDerivative(item)).ToArray();
 
             for (int i = 0; i < LastInputListSize; ++i)
             {
@@ -46,6 +64,15 @@ namespace NeuralNetwork.Components
             }
 
                 return toReturn;
+        }
+        
+
+        private void ActivateAll(double[] vector)
+        {
+            for(int i = 0; i < vector.Length; ++i)
+            {
+                vector[i] = ActivateFunction(vector[i]);
+            }
         }
     }
 }

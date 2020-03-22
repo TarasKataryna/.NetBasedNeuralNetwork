@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
-
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-using NeuralNetwork.Components;
-using NeuralNetwork.Helpers;
-using NeuralNetwork.Extensions;
 using NeuralNetwork.Factory;
-using NeuralNetwork.Networks;
+using FaceRecognitionNN.Helpers;
+using NeuralNetwork.Helpers;
+using System;
+using NeuralNetwork.Extensions;
 
 namespace FaceRecognitionNN
 {
@@ -22,15 +15,20 @@ namespace FaceRecognitionNN
         static void Main(string[] args)
         {
             var host = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config.AddJsonFile("appconfiguration.json");
+                })
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddHostedService<StartUp>();
                     services.AddTransient<IFactory,MultilayerPerceptronFactory>();
+                    services.AddTransient<IReader, FileReaderHelper>();
+
+                    services.AddHostedService<StartUp>();
                 })
                 .Build();
 
             host.Run();
         }
-
     }
 }

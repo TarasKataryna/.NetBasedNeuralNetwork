@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using MathNet.Numerics.Distributions;
 using NeuralNetwork.Components;
 using NeuralNetwork.Networks;
+using static NeuralNetwork.Common;
 
 namespace NeuralNetwork.Factory
 {
@@ -11,15 +12,16 @@ namespace NeuralNetwork.Factory
     {
         public Network CreateStandart()
         {
-            var learningRate = 0.1;
 
             var inputLayerNeuronsCount = 784;
             var hiddenLayerNeuronsCount = 100;
             var outputLayerNeuronsCount = 10;
+
             ActivateFunction activateFunction = (double x) => { return 1 / (1 + Math.Exp((-1) * x)); };
             ActivateFunction activateFunctionDerivative = (double x) => { return (1 / (1 + Math.Exp((-1) * x))) * (1 - (1 / (1 + Math.Exp((-1) * x)))); };
 
-            var rand = new Random();
+            //normal distribution
+            Normal normal = new Normal(0, Math.Pow(inputLayerNeuronsCount, -0.5));
 
             double[][] hiddenLayerWeights = new double[inputLayerNeuronsCount][];
             for (int i = 0; i < inputLayerNeuronsCount; ++i)
@@ -27,19 +29,19 @@ namespace NeuralNetwork.Factory
                 hiddenLayerWeights[i] = new double[hiddenLayerNeuronsCount];
                 for (int j = 0; j < hiddenLayerNeuronsCount; ++j)
                 {
-                    hiddenLayerWeights[i][j] = rand.Next(hiddenLayerNeuronsCount, inputLayerNeuronsCount)
-                        * Math.Sqrt(2.0 / (inputLayerNeuronsCount + hiddenLayerNeuronsCount));
+                    hiddenLayerWeights[i][j] = normal.Sample();
                 }
             }
 
+            //normal distribution
+            normal = new Normal(0, Math.Pow(hiddenLayerNeuronsCount, -0.5));
             double[][] outputLayerWeights = new double[hiddenLayerNeuronsCount][];
             for (int i = 0; i < hiddenLayerNeuronsCount; ++i)
             {
-                hiddenLayerWeights[i] = new double[outputLayerNeuronsCount];
+                outputLayerWeights[i] = new double[outputLayerNeuronsCount];
                 for (int j = 0; j < outputLayerNeuronsCount; ++j)
                 {
-                    hiddenLayerWeights[i][j] = rand.Next(outputLayerNeuronsCount, hiddenLayerNeuronsCount)
-                        * Math.Sqrt(2.0 / (outputLayerNeuronsCount + hiddenLayerNeuronsCount));
+                    outputLayerWeights[i][j] = normal.Sample();
                 }
             }
 

@@ -3,13 +3,17 @@ using System.Collections;
 
 using NeuralNetwork.Interfaces;
 using NeuralNetwork.Extensions;
+using NeuralNetwork;
+
+using static NeuralNetwork.Common;
 
 namespace NeuralNetwork.Components
 {
     public class Layer: ISumable
     {
-        public int NeuronsCount { get; set; }
+        #region Properties
 
+        public int NeuronsCount { get; set; }
 
         public double[][] Weights { get; set; }
 
@@ -27,9 +31,11 @@ namespace NeuralNetwork.Components
 
         public ActivateFunction ActivateFunctionDerivative { get; set; }
 
+        #endregion
+
         public Layer(int neuronsCount, double[][] weights, ActivateFunction func, ActivateFunction funcDerivative)
         {
-            if(neuronsCount != weights.Length)
+            if(neuronsCount != weights[0].Length)
             {
                 throw new Exception("Size of weights and neurons count is not right, please make changes");
             }
@@ -109,6 +115,4 @@ namespace NeuralNetwork.Components
 
         #endregion
     }
-
-    public delegate double ActivateFunction(double element);
 }

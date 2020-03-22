@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 
 using NeuralNetwork.Helpers;
+using NeuralNetwork.Interfaces;
 
 namespace NeuralNetwork.Components
 {
-    public class PollingLayer
+    public class PollingLayer : IConvLayer
     {
         #region Properties
 

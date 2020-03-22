@@ -4,7 +4,8 @@ using System.Text;
 
 namespace NeuralNetwork.Networks
 {
-    public class Network
+    public abstract class Network
     {
+        int LayersCount { get; set; }
     }
 }

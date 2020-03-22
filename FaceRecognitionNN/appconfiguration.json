@@ -1,0 +1,6 @@
+{
+  "python_exe": "C:\\Users\\tarik\\AppData\\Local\\Programs\\Python\\Python36\\python.exe",
+  "python_analysis_file": "C:\\Users\\tarik\\source\\repos\\FaceRecognitionNN\\FaceRecognitionNN\\Analysis\\plot.py",
+  "data_mnist_train": "C:\\Users\\tarik\\source\\repos\\FaceRecognitionNN\\Data\\mnist_train_100.csv",
+  "loss_results": "C:\\Users\\tarik\\source\\repos\\FaceRecognitionNN\\Data\\loss_results.txt"
+}
