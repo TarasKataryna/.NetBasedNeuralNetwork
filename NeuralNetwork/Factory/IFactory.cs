@@ -6,6 +6,6 @@ namespace NeuralNetwork.Factory
 {
     public interface IFactory
     {
-        Networks.Network CreateStandart();
+        Networks.Network CreateStandart(params int[] param);
     }
 }

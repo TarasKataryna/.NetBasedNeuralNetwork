@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using NeuralNetwork.Helpers;
 using NeuralNetwork.Interfaces;
 
@@ -16,6 +16,8 @@ namespace NeuralNetwork.Components
 
         public int KernelStride { get; set; }
 
+        public double LearningRate { get; set; }
+
         public PollingLayer(int kernnelSize, int kernelPadding, int kernelStride)
         {
             KernelSize = kernnelSize;
@@ -29,6 +31,14 @@ namespace NeuralNetwork.Components
 
         public List<double[][]> ProcessMaps(List<double[][]> maps)
         {
+            //i think that's not right imlementation to ignore one row and one column is case map size is odd number
+            // todo: make it right
+
+            if(maps[0].Length % 2 != 0)
+            {
+                maps = maps.Select(item => ArrayHelper.IncreaseLastRowAndColumn(item)).ToList();
+            }
+
             LastInput = maps;
 
             var listToReturn = new  List<double[][]>();

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NeuralNetwork.Interfaces
+﻿namespace NeuralNetwork.Interfaces
 {
     public interface ILayer
     {

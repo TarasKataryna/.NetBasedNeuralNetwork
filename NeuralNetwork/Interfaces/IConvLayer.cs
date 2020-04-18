@@ -12,6 +12,8 @@ namespace NeuralNetwork.Interfaces
 
         int KernelStride { get; }
 
+        double LearningRate { get; set; }
+
         List<double[][]> ProcessMaps(List<double[][]> maps);
 
         List<double[][]> ProcessBackpropMaps(List<double[][]> outputMapsGradient);

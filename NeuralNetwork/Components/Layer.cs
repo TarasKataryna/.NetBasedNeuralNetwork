@@ -5,7 +5,7 @@ using NeuralNetwork.Interfaces;
 using NeuralNetwork.Extensions;
 using NeuralNetwork;
 
-using static NeuralNetwork.Common;
+using NeuralNetwork.Common;
 
 namespace NeuralNetwork.Components
 {

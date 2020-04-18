@@ -1,6 +1,4 @@
-﻿using NeuralNetwork.Components;
-
-namespace NeuralNetwork.Interfaces
+﻿namespace NeuralNetwork.Interfaces
 {
     public interface ISumable : ILayer
     {

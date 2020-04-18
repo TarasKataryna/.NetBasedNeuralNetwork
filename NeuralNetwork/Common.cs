@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NeuralNetwork
+﻿namespace NeuralNetwork.Common
 {
-    public static class Common
+    public delegate double ActivateFunction(double element);
+
+    public enum LayerType
     {
-        public delegate double ActivateFunction(double element);
+        PerceptronLayer = 1,
+        CovolutionalLayer = 2,
+        PoolingLayer = 3,
+        ReluLayer = 4,
+        FlattenLayer = 5
     }
+
 }

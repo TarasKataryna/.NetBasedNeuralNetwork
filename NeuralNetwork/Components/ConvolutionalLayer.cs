@@ -23,6 +23,8 @@ namespace NeuralNetwork.Components
 
         public int KernelDepth => Kernels != null ? Kernels[0].Length : 0;
 
+        public double LearningRate { get; set; }
+
         public List<double[][]> LastInput { get; set; }
 
         #endregion
@@ -151,7 +153,7 @@ namespace NeuralNetwork.Components
                             res += gradOutput[a][b] * inputForKernelLayer[i + a][j + b];
                         }
                     }
-                    Kernels[kernelIndex][kernelLayerIndex][i][j] += res;
+                    Kernels[kernelIndex][kernelLayerIndex][i][j] += res * LearningRate;
                 }
             }
         }
