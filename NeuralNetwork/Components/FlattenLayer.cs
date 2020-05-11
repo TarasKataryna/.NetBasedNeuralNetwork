@@ -18,6 +18,8 @@ namespace NeuralNetwork.Components
 
         public int LastInputListSize { get; set; }
 
+        public double[] LastOutput { get; set; }
+
         public ActivateFunction ActivateFunction { get; set; }
 
         public ActivateFunction ActivateFunctionDerivative { get; set; }
@@ -39,6 +41,7 @@ namespace NeuralNetwork.Components
             }
 
             ActivateAll(toReturn);
+            LastOutput = toReturn;
 
             return toReturn;
         }

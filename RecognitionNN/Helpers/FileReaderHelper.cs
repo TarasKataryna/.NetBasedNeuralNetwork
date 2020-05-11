@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace FaceRecognitionNN.Helpers
+namespace RecognitionNN.Helpers
 {
     public class FileReaderHelper : IReader
     {
@@ -14,7 +14,7 @@ namespace FaceRecognitionNN.Helpers
             {
                 while (!reader.EndOfStream)
                 {
-                    lines.Add(reader.ReadLine().Split(","));
+                    lines.Add(reader.ReadLine().Split(','));
                 }
             }
 

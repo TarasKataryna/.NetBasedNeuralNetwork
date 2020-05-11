@@ -45,9 +45,14 @@ namespace NeuralNetwork.Components
 
         #region Public Methods
 
-        public double[][] ProcessMap(List<double[][]> maps, int filterIndex, int featureMapSize)
+        public double[][] ProcessMap(List<double[][]> maps, int filterIndex, int featureMapSize, bool subOne)
         {
             var featureMap = ArrayHelper.Matrix(featureMapSize, featureMapSize, 0);
+
+            if (subOne)
+            {
+                featureMapSize -= 1;
+            }
 
             for (int depth = 0; depth < KernelDepth; ++depth)
             {
@@ -79,9 +84,16 @@ namespace NeuralNetwork.Components
             var listToReturn = new List<double[][]>();
             int featureMapSize = (maps[0].Length - KernelSize + 2 * KernelPadding) / KernelStride + 1;
 
+            bool subOne = false;
+            if(featureMapSize % 2 != 0)
+            {
+                featureMapSize += 1;
+                subOne = true;
+            }
+
             for (int i = 0; i < KernelsCount; ++i)
             {
-                var newFeatureMap = ProcessMap(maps, i, featureMapSize);
+                var newFeatureMap = ProcessMap(maps, i, featureMapSize, subOne);
                 listToReturn.Add(newFeatureMap);
             }
 

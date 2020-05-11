@@ -1,14 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using NeuralNetwork.Factory;
-using FaceRecognitionNN.Helpers;
+using RecognitionNN.Helpers;
 using NeuralNetwork.Helpers;
-using System;
 using NeuralNetwork.Extensions;
 
-namespace FaceRecognitionNN
+namespace RecognitionNN
 {
     class Program
     {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using NeuralNetwork.Components;
 using NeuralNetwork.Helpers;
 using NeuralNetwork.Interfaces;
+using NeuralNetwork.Extensions;
 
 namespace NeuralNetwork.Networks
 {
@@ -31,7 +33,7 @@ namespace NeuralNetwork.Networks
 
         #endregion
 
-        #region Public Methods
+        #region SGD
 
         public List<double> SGDTrain(
             double learningRate,
@@ -65,15 +67,16 @@ namespace NeuralNetwork.Networks
         }
 
         public List<double> SGDTrainFromDir(
-           double learningRate,
            int epochs,
+           double learningRate,
+           double lossEps,
            string[] filesPath,
            int[] inputResults,
-           double lossEps,
-           int inputDataCount,
            int classCount)
         {
             var toReturn = new List<double>();
+
+            var inputDataCount = filesPath.Length;
 
             for (int i = 0; i < epochs; ++i)
             {
@@ -129,6 +132,95 @@ namespace NeuralNetwork.Networks
             }
 
             return loss;
+        }
+
+        #endregion
+
+        #region Mini-Datch SGD
+
+        public List<double> MiniBatchSGD(
+            int epochs,
+            double learningRate,
+            int batchSize,
+            double lossEps,
+            string[] filesPath,
+            int[] inputResults,
+            int classCount)
+        {
+
+            var toReturn = new List<double>();
+
+            var inputDataCount = filesPath.Length;
+
+            for (int i = 0; i < epochs; ++i)
+            {
+                var batchCount = (int)(inputDataCount / batchSize);
+
+                for (int j = 0; j < batchCount; j++)
+                {
+                    var loss = 0.0;
+                    var losses = new List<double>();
+                    var outputLayerGradient = new double[Perceptron.OutputLayer.NeuronsCount];
+                    var inputResult = new double[classCount];
+
+                    for (int k = 0; k < batchSize; k++)
+                    {
+                        inputResult = PrepareInputResult(inputResults[k + j * batchSize], classCount);
+
+                        var input = ImageProcessingHelper.PrepareData(filesPath[k + j * batchSize]);
+
+                        losses.Add(FeedForwardStep(learningRate, input, inputResult));
+
+                        outputLayerGradient.Add(Perceptron.GetOutputLayerGradient(inputResult));
+                    }
+
+                    outputLayerGradient.ForEach(item => item = item / batchSize);
+
+                    BackwardStep(outputLayerGradient, learningRate, inputResult);
+
+                    loss = losses.Sum() / losses.Count;
+
+
+                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss}");
+
+                    toReturn.Add(Math.Abs(loss));
+                    if (Math.Abs(loss) < lossEps)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return toReturn;
+        }
+
+        public double FeedForwardStep(double learningRate, List<double[][]> input, double[] inputResult)
+        {
+            var loss = .0;
+
+            //feedforward
+            var lastInput = input;
+            for (int i = 0; i < Layers.Count; ++i)
+            {
+                lastInput = Layers[i].ProcessMaps(lastInput);
+            }
+            var arr = FlattenLayer.ProcessMaps(lastInput);
+
+            var results = Perceptron.SGDStep(learningRate, arr, inputResult);
+            loss = results.Item1;
+
+            return loss;
+        }
+
+        public void BackwardStep(double[] outputLayerGradient, double learningRate, double[] inputResult)
+        {
+            var flattenLayerGradient = Perceptron.BackwardStep(learningRate, FlattenLayer.LastOutput, inputResult, outputLayerGradient);
+            var gradientToProcess = FlattenLayer.ProcessBackpropMaps(flattenLayerGradient);
+
+            for (int i = 0; i < Layers.Count; ++i)
+            {
+                gradientToProcess = Layers[i].ProcessBackpropMaps(gradientToProcess);
+            }
         }
 
         #endregion

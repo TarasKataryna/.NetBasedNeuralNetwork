@@ -9,14 +9,14 @@ using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-using FaceRecognitionNN.Helpers;
+using RecognitionNN.Helpers;
 
 using NeuralNetwork.Factory;
 using NeuralNetwork.Networks;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace FaceRecognitionNN
+namespace RecognitionNN
 {
     public class StartUp : IHostedService
     {
@@ -42,7 +42,7 @@ namespace FaceRecognitionNN
 
             Thread.CurrentThread.CurrentCulture = customCulture;
 
-            var lossCollection = CreateNetworkAndRun(filepath);
+            var lossCollection = CreateCNNAndRun(filepath, false);
             var lossStringCollection =  string.Join(";", lossCollection);
             var resultList = new List<string>
             {
@@ -87,7 +87,10 @@ namespace FaceRecognitionNN
             for (int i = 0; i < data.Count; ++i)
             {
                 inputResults[i] = new double[10];
-                Array.Fill(inputResults[i], 0.1);
+                for(int j = 0; j < 10; ++j)
+                {
+                    inputResults[i][j] = 0.1;
+                }
 
                 inputResults[i][results[i]] = 1;
             }
@@ -95,6 +98,29 @@ namespace FaceRecognitionNN
             var loss = network.SGDTrain(0.3, 4, inputs, inputResults, 0.0000001, data.Count);
 
             return loss.ToArray();
+        }
+
+        private double[] CreateCNNAndRun(string ingInfoPath, bool onGpu)
+        {
+            var inputLayerNeuronsCount = 1452;
+            var hiddenLayerNeuronsCount = 500;
+            var outputLayerNeuronsCount = 90;
+
+            var learningRate = 0.3;
+
+            var network = factory.CreateStandart(inputLayerNeuronsCount, hiddenLayerNeuronsCount, outputLayerNeuronsCount);
+            double[] results = null;
+
+            if (!onGpu)
+            {
+               
+            }
+            else
+            {
+                throw new Exception("Impementation is not completed yet");
+            }
+
+            return results;
         }
 
         private void LaunchAnalysis(string loss)

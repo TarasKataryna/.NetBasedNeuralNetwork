@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FaceRecognitionNN.Helpers
+namespace RecognitionNN.Helpers
 {
     public interface IReader
     {

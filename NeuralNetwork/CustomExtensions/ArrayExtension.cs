@@ -222,5 +222,26 @@ namespace NeuralNetwork.Extensions
             Array.ForEach(arr, action);
         }
 
+
+        public static void Add(this double[] arr, double[] s)
+        {
+            for(int i = 0; i < arr.Length; ++i)
+            {
+                arr[i] = arr[i] + s[i];
+            }
+        }
+
+        public static double[] Sub(this double[] arr, double[] s)
+        {
+            var toReturn = new double[arr.Length];
+
+            for (int i = 0; i < arr.Length; ++i)
+            {
+                toReturn[i] = arr[i] - s[i];
+            }
+
+            return toReturn;
+        }
+
     }
 }

@@ -44,6 +44,11 @@ namespace NeuralNetwork.Factory
 
         }
 
+        public static FlattenLayer CreateFlattenLayer()
+        {
+            return new FlattenLayer();
+        }
+
         private static double[][] CreateKernel(int kernelSize, int neuronsCount)
         {
             Normal normal = new Normal(0, Math.Pow(neuronsCount, -0.5));

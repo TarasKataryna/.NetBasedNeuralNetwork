@@ -36,7 +36,10 @@ namespace NeuralNetwork.Helpers
             for (int i = 0; i < m; ++i)
             {
                 toReturn[i] = new double[n];
-                Array.Fill(toReturn[i], d);
+                for (int j = 0; j < n; ++j)
+                {
+                    toReturn[i][j] = d;
+                }
             }
 
             return toReturn;
@@ -97,7 +100,10 @@ namespace NeuralNetwork.Helpers
                 toReturn[i][newColLen - 1] = 0;
             }
 
-            Array.Fill<double>(toReturn[newRowLen - 1], 0);
+            for(int i = 0; i < newColLen; ++i)
+            {
+                toReturn[newRowLen - 1][i] = 0;
+            }
 
             return toReturn;
         }
