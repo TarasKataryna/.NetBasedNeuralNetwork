@@ -96,7 +96,7 @@ namespace NeuralNetwork.Networks
 
             for (int i = 0; i < epochs; ++i)
             {
-                for (int j = 0; j < inputDataCount; ++j)
+                for (int j = 10; j < inputDataCount; ++j)
                 {
                     var loss = SGDStep(learningRate, input[j], inputResults[j]);
 
@@ -181,7 +181,7 @@ namespace NeuralNetwork.Networks
         }
 
         //Mini-batch step
-        public double FeedForwardStep(double[] input, double[] inputResults)
+        public Tuple<double, int> FeedForwardStep(double[] input, double[] inputResults)
         {
             var loss = .0;
 
@@ -200,7 +200,17 @@ namespace NeuralNetwork.Networks
             }
             loss /= OutputLayer.NeuronsCount;
 
-            return loss;
+            //calculating count of right precision
+            var resIdx = inputResults.IndexOf(1);
+            var maxValue = OutputLayer.OutputNonMatrix.Max();
+            var maxValueIndex = OutputLayer.OutputNonMatrix.IndexOf(maxValue);
+            int tr = 0;
+            if (maxValueIndex == resIdx)
+            {
+                tr = 1;
+            }
+
+            return new Tuple<double, int>(loss,tr);
         }
 
         public double[] BackwardStep(double learningRate, double[] input, double[] inputResults, double[] layerGradient)
@@ -333,5 +343,6 @@ namespace NeuralNetwork.Networks
         }
 
         #endregion
+
     }
 }

@@ -89,13 +89,13 @@ namespace NeuralNetwork.Components
 
             for(int i = 0; i < maps.Count; ++i)
             {
-                listToReturn.Add(ProcessBackpropMap(maps[i]));
+                listToReturn.Add(ProcessBackpropMap(maps[i], LastInput[i]));
             }
 
             return listToReturn;
         }
 
-        public double[][] ProcessBackpropMap(double[][] map)
+        public double[][] ProcessBackpropMap(double[][] map, double[][] inputMap)
         {
             int lastInputSize = LastInput[0].Length;
 
@@ -110,14 +110,14 @@ namespace NeuralNetwork.Components
 
                     int iOfMax = indexI;
                     int jOfMax = indexJ;
-                    double max = map[indexI][indexJ];
+                    double max = inputMap[indexI][indexJ];
                     for (int a = 0; a < KernelSize; ++a)
                     {
                         for (int b = 0; b < KernelSize; ++b)
                         {
-                            if (max < map[indexI + a][indexJ + b])
+                            if (max < inputMap[indexI + a][indexJ + b])
                             {
-                                max = map[indexI + a][indexJ + b];
+                                max = inputMap[indexI + a][indexJ + b];
                                 iOfMax = indexI + a;
                                 jOfMax = indexJ + b;
                             }

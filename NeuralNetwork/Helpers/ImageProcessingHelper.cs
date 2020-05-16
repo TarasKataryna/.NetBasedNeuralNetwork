@@ -26,9 +26,9 @@ namespace NeuralNetwork.Helpers
             {
                 for (int j = 0; j < width; ++j)
                 {
-                    R[i][j] = image.GetPixel(j, i).R / 255 * 0.99 + 0.01;
-                    G[i][j] = image.GetPixel(j, i).G / 255 * 0.99 + 0.01;
-                    B[i][j] = image.GetPixel(j, i).B / 255 * 0.99 + 0.01;
+                    R[i][j] = (double)image.GetPixel(j, i).R / 255 * 0.99 + 0.01;
+                    G[i][j] = (double)image.GetPixel(j, i).G / 255 * 0.99 + 0.01;
+                    B[i][j] = (double)image.GetPixel(j, i).B / 255 * 0.99 + 0.01;
                 }
             }
 

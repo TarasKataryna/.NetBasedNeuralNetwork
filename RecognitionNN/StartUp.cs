@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,8 +15,10 @@ using RecognitionNN.Helpers;
 
 using NeuralNetwork.Factory;
 using NeuralNetwork.Networks;
-using System.Diagnostics;
-using System.Globalization;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace RecognitionNN
 {
@@ -33,43 +37,62 @@ namespace RecognitionNN
             this.configuration = conf;
         }
 
-        #region public methods
+        private Task mainTask;
 
-        public void Run(string filepath)
+        private CancellationTokenSource source = new CancellationTokenSource();
+
+        #region Public methods
+
+        public void Run(string filepath, bool onGpu, bool sgd, CancellationToken cancellation)
         {
             CultureInfo customCulture = (CultureInfo)Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
 
             Thread.CurrentThread.CurrentCulture = customCulture;
 
-            var lossCollection = CreateCNNAndRun(filepath, false);
-            var lossStringCollection =  string.Join(";", lossCollection);
+            List<double> lossCollection = new List<double>();
+            try
+            {
+                 lossCollection = CreateCNNAndRun(filepath, onGpu, sgd, cancellation);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            var lossStringCollection = string.Join(";", lossCollection);
             var resultList = new List<string>
             {
                 lossStringCollection,
-                string.Join(";", Enumerable.Range(1, lossCollection.Length))
+                string.Join(";", Enumerable.Range(1, lossCollection.Count))
             };
 
             reader.Write(configuration["loss_results"], resultList);
-
+            Console.WriteLine("Results");
             LaunchAnalysis(lossStringCollection);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            return Task.Run(() => Run(configuration["data_mnist_train"]));
+
+            mainTask = Task.Run(() => Run(configuration["image_info"],
+                string.IsNullOrEmpty(configuration["onGpu"]) ? false : Convert.ToBoolean(configuration["onGpu"]),
+                string.IsNullOrEmpty(configuration["sgd"]) ? false : Convert.ToBoolean(configuration["sgd"]), 
+                source.Token));
+
+            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return null;
+            source.Cancel();
+            return mainTask;
         }
 
         #endregion
 
         #region private methods
 
-        private double[] CreateNetworkAndRun(string filePath)
+        private List<double> CreateNetworkAndRun(string filePath)
         {
             var data = reader.Read(filePath);
             var network = (MultilayerPerceptron)factory.CreateStandart();
@@ -87,7 +110,7 @@ namespace RecognitionNN
             for (int i = 0; i < data.Count; ++i)
             {
                 inputResults[i] = new double[10];
-                for(int j = 0; j < 10; ++j)
+                for (int j = 0; j < 10; ++j)
                 {
                     inputResults[i][j] = 0.1;
                 }
@@ -97,23 +120,45 @@ namespace RecognitionNN
 
             var loss = network.SGDTrain(0.3, 4, inputs, inputResults, 0.0000001, data.Count);
 
-            return loss.ToArray();
+            return loss;
         }
 
-        private double[] CreateCNNAndRun(string ingInfoPath, bool onGpu)
+        private List<double> CreateCNNAndRun(string imgInfoPath, bool onGpu, bool sgd, CancellationToken cancellation)
         {
-            var inputLayerNeuronsCount = 1452;
-            var hiddenLayerNeuronsCount = 500;
+            var inputLayerNeuronsCount = 972;
+            var hiddenLayerNeuronsCount = 300;
             var outputLayerNeuronsCount = 90;
 
-            var learningRate = 0.3;
+            var learningRate = 0.01;
+            var lossEps = 10e-7;
+            var classCount = 90;
 
-            var network = factory.CreateStandart(inputLayerNeuronsCount, hiddenLayerNeuronsCount, outputLayerNeuronsCount);
-            double[] results = null;
+            var network = (CNN)factory.CreateStandart(inputLayerNeuronsCount, hiddenLayerNeuronsCount, outputLayerNeuronsCount);
+            List<double> results = null;
+
+            var imageInfo = JArray.Parse(File.ReadAllText(imgInfoPath)).AsJEnumerable().ToList();
+
+            var baseImagePath = configuration["base_image_path"];
+
+            string[] imagePaths = imageInfo.Select(item => baseImagePath + item.Value<string>("image_name")).ToArray();
+            int[] inputResults = imageInfo.Select(item => Int32.Parse(item.Value<string>("category_id"))).ToArray();
+
+            //for index in result array (90 has a 89 index in array)
+            for (int i = 0; i < inputResults.Length; ++i)
+            {
+                inputResults[i] -= 1;
+            }
 
             if (!onGpu)
             {
-               
+                if (sgd)
+                {
+                    results = network.SGDTrain(1, learningRate, 32, lossEps, imagePaths, inputResults, classCount, cancellation);
+                }
+                else
+                {
+                    results = network.MiniBatchSGD(1, learningRate, 32, lossEps, imagePaths, inputResults, classCount, cancellation);
+                }
             }
             else
             {

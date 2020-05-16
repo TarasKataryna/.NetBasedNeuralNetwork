@@ -127,6 +127,10 @@ namespace NeuralNetwork.Components
         public void ProcessGradientMap(double[][] outputMapGradient, double[][] resizedOutputMapGradient, List<double[][]> gradientForInput, int kernelIndex)
         {
             var kernelsCopy = Kernels[kernelIndex].DeepCopy();
+            for(int i = 0; i < kernelsCopy.Length; ++i)
+            {
+                RotateMatrix(kernelsCopy[i]);
+            }
 
             for (int i = 0; i < Kernels[kernelIndex].Length; ++i)
             {
@@ -152,6 +156,7 @@ namespace NeuralNetwork.Components
             int kernelIndex,
             int kernelLayerIndex)
         {
+
             //just simple convolution with weight update 
             for (int i = 0; i < KernelSize; ++i)
             {
@@ -176,6 +181,7 @@ namespace NeuralNetwork.Components
             double[][] resizedOutputMapGradient,
             double[][] gradientForInput)
         {
+
             for (int i = 0; i < gradientForInput.Length; ++i)
             {
                 for (int j = 0; j < gradientForInput[i].Length; ++j)
@@ -185,13 +191,49 @@ namespace NeuralNetwork.Components
                     {
                         for (int b = 0; b < KernelSize; ++b)
                         {
-                            res += kernelsCopy[i][j] * resizedOutputMapGradient[i + a][j + b];
+                            res += kernelsCopy[a][b] * resizedOutputMapGradient[i + a][j + b];
                         }
                     }
                     gradientForInput[i][j] += res;
                 }
             }
         }
+
+        #region Rotate
+        private void RotateMatrix(double[][] matrix)
+        {
+            int rows = matrix.Length;
+            int cols = matrix[0].Length;
+
+            if (rows % 2 != 0)
+            {
+                //If N is odd reverse the middle row in the matrix 
+                reverseRow(matrix, matrix.Length / 2);
+            }
+
+            //Swap the value of matrix [i][j] with [rows - i - 1][cols - j - 1] for half the rows size.  
+            for (int i = 0; i <= (rows / 2) - 1; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    double temp = matrix[i][j];
+                    matrix[i][j] = matrix[rows - i - 1][cols - j - 1];
+                    matrix[rows - i - 1][cols - j - 1] = temp;
+                }
+            }
+        }
+
+        private void reverseRow(double[][] data, int index)
+        {
+            int cols = data[index].Length;
+            for (int i = 0; i < cols / 2; i++)
+            {
+                double temp = data[index][i];
+                data[index][i] = data[index][cols - i - 1];
+                data[index][cols - i - 1] = temp;
+            }
+        }
+        #endregion
 
         #endregion
     }

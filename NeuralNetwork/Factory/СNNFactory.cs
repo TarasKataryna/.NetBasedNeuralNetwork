@@ -5,28 +5,32 @@ using NeuralNetwork.Networks;
 
 namespace NeuralNetwork.Factory
 {
-    class СNNFactory : IFactory
+    public class СNNFactory : IFactory
     {
         public Network CreateStandart(params int[] param)
         {
             var network = new CNN();
             network.Layers = new List<IConvLayer>();
 
-            var lr = 0.3;
+            var lr = 0.01;
 
-            network.Layers.Add(ConvLayerFactory.Create(300 * 300, 3, 5, (byte)LayerType.CovolutionalLayer, lr));
+            //for cnn (neurons count) = filter_size^2 + input channels count
+            network.Layers.Add(ConvLayerFactory.Create(350, 3, 5, (byte)LayerType.CovolutionalLayer, lr, 400));
+            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
+            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.ReluLayer));
+
+            network.Layers.Add(ConvLayerFactory.Create(174, 5, 5, (byte)LayerType.CovolutionalLayer, lr, 350));
             network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
 
-            network.Layers.Add(ConvLayerFactory.Create(200 * 200, 5, 5, (byte)LayerType.CovolutionalLayer, lr));
+            network.Layers.Add(ConvLayerFactory.Create(86, 5, 3, (byte)LayerType.CovolutionalLayer, lr, 174));
+            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
+            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.ReluLayer));
+
+            network.Layers.Add(ConvLayerFactory.Create(42, 3, 3, (byte)LayerType.CovolutionalLayer, lr, 86));
             network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
 
-            network.Layers.Add(ConvLayerFactory.Create(100 * 100, 5, 3, (byte)LayerType.CovolutionalLayer, lr));
-            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
-
-            network.Layers.Add(ConvLayerFactory.Create(50 * 50, 3, 3, (byte)LayerType.CovolutionalLayer, lr));
-            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.PoolingLayer));
-
-            network.Layers.Add(ConvLayerFactory.Create(24 * 24, 3, 3, (byte)LayerType.CovolutionalLayer, lr));
+            network.Layers.Add(ConvLayerFactory.Create(20, 3, 3, (byte)LayerType.CovolutionalLayer, lr, 42));
+            network.Layers.Add(ConvLayerFactory.Create(layerType: (byte)LayerType.ReluLayer));
             network.FlattenLayer = ConvLayerFactory.CreateFlattenLayer(); 
 
             network.Perceptron = (MultilayerPerceptron)(new MultilayerPerceptronFactory().CreateStandart(param));

@@ -29,18 +29,20 @@ namespace NeuralNetwork.Components
             LastInputKernelSize = maps[0].Length;
             LastInputListSize = maps.Count;
 
+            var mapsLength = maps[0].Length * maps[0][0].Length;
+
             var arrayLength = maps.Count * maps[0].Length * maps[0].Length;
             var toReturn = new double[arrayLength];
 
-            for(int i = 0; i < maps.Count; ++i)
+            for (int i = 0; i < maps.Count; ++i)
             {
-                for(int j=0;j<maps[i].Length;++j)
+                for (int j = 0; j < maps[i].Length; ++j)
                 {
-                    Array.Copy(maps[i][j], 0, toReturn, j * maps[i].Length, maps[i].Length);
+                    Array.Copy(maps[i][j], 0, toReturn, i * mapsLength + j * maps[i].Length, maps[i].Length);
                 }
             }
 
-            ActivateAll(toReturn);
+            //ActivateAll(toReturn);
             LastOutput = toReturn;
 
             return toReturn;
@@ -51,28 +53,29 @@ namespace NeuralNetwork.Components
             var toReturn = new List<double[][]>();
 
             //here we continue computing gradient multiplying on activate function derivative
-            gradients = gradients.Select(item => ActivateFunctionDerivative(item)).ToArray();
+            //gradients = gradients.Select(item => ActivateFunctionDerivative(item)).ToArray();
 
             for (int i = 0; i < LastInputListSize; ++i)
             {
                 var matrix = new double[LastInputKernelSize][];
-                for(int j = 0; j < LastInputKernelSize; ++j)
+                for (int j = 0; j < LastInputKernelSize; ++j)
                 {
                     matrix[j] = new double[LastInputKernelSize];
-                    for(int k = 0; k < LastInputKernelSize; ++k)
+                    for (int k = 0; k < LastInputKernelSize; ++k)
                     {
                         matrix[j][k] = gradients[i * LastInputKernelSize * LastInputKernelSize + j * LastInputKernelSize + k];
                     }
                 }
+                toReturn.Add(matrix);
             }
 
-                return toReturn;
+            return toReturn;
         }
-        
+
 
         private void ActivateAll(double[] vector)
         {
-            for(int i = 0; i < vector.Length; ++i)
+            for (int i = 0; i < vector.Length; ++i)
             {
                 vector[i] = ActivateFunction(vector[i]);
             }
