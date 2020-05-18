@@ -601,5 +601,8 @@ $RECYCLE.BIN/
 # Ignore all local history of files
 .history
 
+Data/
+
+appconfiguration.json
 
 # End of https://www.gitignore.io/api/c,c++,cuda,csharp,windows,dotnetcore,aspnetcore
