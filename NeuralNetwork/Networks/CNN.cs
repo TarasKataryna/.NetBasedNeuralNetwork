@@ -190,7 +190,15 @@ namespace NeuralNetwork.Networks
                     {
                         inputResult = PrepareInputResult(inputResults[k + j * batchSize], classCount);
 
-                        var input = ImageProcessingHelper.PrepareData(filesPath[k + j * batchSize]);
+                        List<double[][]> input = new List<double[][]>();
+                        try
+                        {
+	                        input = ImageProcessingHelper.PrepareData(filesPath[k + j * batchSize]);
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
 
                         var stepResults = FeedForwardStep(learningRate, input, inputResult);
                         losses.Add(stepResults.Item1);

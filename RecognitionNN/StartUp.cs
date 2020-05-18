@@ -129,7 +129,7 @@ namespace RecognitionNN
             var hiddenLayerNeuronsCount = 300;
             var outputLayerNeuronsCount = 90;
 
-            var learningRate = 0.01;
+            var learningRate = 0.05;
             var lossEps = 10e-7;
             var classCount = 90;
 

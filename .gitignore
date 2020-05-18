@@ -606,3 +606,4 @@ Data/
 appconfiguration.json
 
 # End of https://www.gitignore.io/api/c,c++,cuda,csharp,windows,dotnetcore,aspnetcore
+RecognitionNN/appconfiguration.json

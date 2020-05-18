@@ -22,7 +22,7 @@ namespace ConsoleApp1
             var str = "";
             while(str.ToLower() != "q")
             {
-                str = Console.ReadLine().ToString();
+                str = Console.ReadLine();
             }
 
             cancelTokenSource.Cancel();
