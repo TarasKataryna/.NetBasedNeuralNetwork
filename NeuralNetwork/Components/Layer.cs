@@ -33,6 +33,17 @@ namespace NeuralNetwork.Components
 
         #endregion
 
+        public Layer(int neuronsCount, double[][] weights)
+        {
+	        ActivateFunction activateFunction = (double x) => { return 1 / (1 + Math.Exp((-1) * x)); };
+	        ActivateFunction activateFunctionDerivative = (double x) => { return (1 / (1 + Math.Exp((-1) * x))) * (1 - (1 / (1 + Math.Exp((-1) * x)))); };
+
+	        this.AcivateFunc = activateFunction;
+	        this.ActivateFunctionDerivative = activateFunctionDerivative;
+	        this.Weights = weights;
+	        this.NeuronsCount = neuronsCount;
+        }
+
         public Layer(int neuronsCount, double[][] weights, ActivateFunction func, ActivateFunction funcDerivative)
         {
             if(neuronsCount != weights[0].Length)

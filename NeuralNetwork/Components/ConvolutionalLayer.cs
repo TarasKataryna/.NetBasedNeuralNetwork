@@ -13,7 +13,7 @@ namespace NeuralNetwork.Components
 
         public List<double[][][]> Kernels { get; set; }
 
-        public int KernelsCount => Kernels != null ? Kernels.Count : 0;
+        public int KernelsCount => Kernels?.Count ?? 0;
 
         public int KernelSize { get; set; }
 
@@ -21,7 +21,7 @@ namespace NeuralNetwork.Components
 
         public int KernelStride { get; set; }
 
-        public int KernelDepth => Kernels != null ? Kernels[0].Length : 0;
+        public int KernelDepth => Kernels?[0].Length ?? 0;
 
         public double LearningRate { get; set; }
 

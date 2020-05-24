@@ -11,6 +11,8 @@ using NeuralNetwork.Extensions;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DAL;
+using DAL.Entities;
 
 namespace RecognitionNN
 {
@@ -18,7 +20,7 @@ namespace RecognitionNN
     {
         static void Main(string[] args)
         {
-            var host = Host.CreateDefaultBuilder()
+	        var host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appconfiguration.json")

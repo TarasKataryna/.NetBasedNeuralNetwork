@@ -23,6 +23,11 @@ namespace NeuralNetwork.Networks
 
         #region Constructor
 
+        public MultilayerPerceptron()
+        {
+	        Layers = new List<Layer>();
+        }
+
         public MultilayerPerceptron(List<Layer> layers)
         {
             Layers = layers;

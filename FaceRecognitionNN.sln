@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{40E6CB78-BA91-4DB7-95AD-07898654212B}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.csproj", "{24BF7A69-85AC-4C03-B356-33FEDBDDC14D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecognitionNN", "RecognitionNN\RecognitionNN.csproj", "{B3E45918-7202-4181-858D-5B26E07F91C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{49EC5B66-E9ED-4D93-96A9-12A070816B16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,18 @@ Global
 		{B3E45918-7202-4181-858D-5B26E07F91C2}.Release|x64.Build.0 = Release|Any CPU
 		{B3E45918-7202-4181-858D-5B26E07F91C2}.Release|x86.ActiveCfg = Release|Any CPU
 		{B3E45918-7202-4181-858D-5B26E07F91C2}.Release|x86.Build.0 = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|x64.Build.0 = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Debug|x86.Build.0 = Debug|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|x64.ActiveCfg = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|x64.Build.0 = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|x86.ActiveCfg = Release|Any CPU
+		{49EC5B66-E9ED-4D93-96A9-12A070816B16}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
