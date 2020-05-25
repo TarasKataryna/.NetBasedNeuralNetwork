@@ -186,7 +186,7 @@ namespace NeuralNetwork.Networks
         }
 
         //Mini-batch step
-        public Tuple<double, int> FeedForwardStep(double[] input, double[] inputResults)
+        public Tuple<double, double> FeedForwardStep(double[] input, double[] inputResults)
         {
             var loss = .0;
 
@@ -207,15 +207,17 @@ namespace NeuralNetwork.Networks
 
             //calculating count of right precision
             var resIdx = inputResults.IndexOf(1);
-            var maxValue = OutputLayer.OutputNonMatrix.Max();
-            var maxValueIndex = OutputLayer.OutputNonMatrix.IndexOf(maxValue);
-            int tr = 0;
-            if (maxValueIndex == resIdx)
-            {
-                tr = 1;
-            }
+            var accuracy = OutputLayer.OutputNonMatrix[resIdx] - inputResults[resIdx];
 
-            return new Tuple<double, int>(loss,tr);
+            //var maxValue = OutputLayer.OutputNonMatrix.Max();
+            //var maxValueIndex = OutputLayer.OutputNonMatrix.IndexOf(maxValue);
+            //double accuraccy = 0;
+            //if (maxValueIndex == resIdx)
+            //{
+            //    accuraccy = inputResults[re]
+            //}
+
+            return new Tuple<double, double>(loss, accuracy);
         }
 
         public double[] BackwardStep(double learningRate, double[] input, double[] inputResults, double[] layerGradient)
@@ -255,7 +257,7 @@ namespace NeuralNetwork.Networks
 
             for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
             {
-                layerGradient[i] = (inputResults[i] - OutputLayer.OutputNonMatrix[i])
+                layerGradient[i] = (OutputLayer.OutputNonMatrix[i] - inputResults[i])
                     * OutputLayer.ActivateFunctionDerivative(OutputLayer.SumOutputNonMatrix[i]);
             }
 
@@ -284,7 +286,7 @@ namespace NeuralNetwork.Networks
             {
                 for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
                 {
-                    layerGradient[i] = (inputResults[i] - OutputLayer.OutputNonMatrix[i])
+                    layerGradient[i] = (OutputLayer.OutputNonMatrix[i] - inputResults[i])
                         * OutputLayer.ActivateFunctionDerivative(OutputLayer.SumOutputNonMatrix[i]);
                 }
             }
@@ -301,6 +303,7 @@ namespace NeuralNetwork.Networks
                 }
             }
 
+            
             prevWeight = Layers[layerIndex].Weights.DeepCopy();
 
             if (layerIndex != 0)
@@ -310,7 +313,7 @@ namespace NeuralNetwork.Networks
                     for (int j = 0; j < Layers[layerIndex].WeightColumnsCount; ++j)
                     {
                         var gradientWeight = layerGradient[j] * Layers[layerIndex - 1].OutputNonMatrix[i];
-                        Layers[layerIndex].Weights[i][j] += learningRate * gradientWeight;
+                        Layers[layerIndex].Weights[i][j] -= learningRate * gradientWeight;
                     }
                 }
             }
@@ -321,7 +324,7 @@ namespace NeuralNetwork.Networks
                     for (int j = 0; j < Layers[0].WeightColumnsCount; ++j)
                     {
                         var gradientWeight = layerGradient[j] * input[i];
-                        Layers[0].Weights[i][j] += learningRate * gradientWeight;
+                        Layers[0].Weights[i][j] -= learningRate * gradientWeight;
                     }
                 }
             }

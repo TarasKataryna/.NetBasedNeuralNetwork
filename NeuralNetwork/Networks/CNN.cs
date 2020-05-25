@@ -157,7 +157,7 @@ namespace NeuralNetwork.Networks
 
         #region Mini-Datch SGD
 
-        public List<double> MiniBatchSGD(
+        public Tuple<List<double>, List<double>> MiniBatchSGD(
             int epochs,
             double learningRate,
             int batchSize,
@@ -170,6 +170,7 @@ namespace NeuralNetwork.Networks
             Console.WriteLine("MINI-BATCH");
 
             var toReturn = new List<double>();
+            var toReturnAc = new List<double>();
 
             var countPrec = 0;
 
@@ -183,6 +184,10 @@ namespace NeuralNetwork.Networks
                 {
                     var loss = 0.0;
                     var losses = new List<double>();
+
+                    var accuracy = 0.0;
+                    var accuracyList = new List<double>();
+
                     var outputLayerGradient = new double[Perceptron.OutputLayer.NeuronsCount];
                     var inputResult = new double[classCount];
 
@@ -202,7 +207,7 @@ namespace NeuralNetwork.Networks
 
                         var stepResults = FeedForwardStep(learningRate, input, inputResult);
                         losses.Add(stepResults.Item1);
-                        countPrec += stepResults.Item2;
+                        accuracyList.Add(stepResults.Item2);
 
                         outputLayerGradient.Add(Perceptron.GetOutputLayerGradient(inputResult));
                     }
@@ -212,11 +217,13 @@ namespace NeuralNetwork.Networks
                     BackwardStep(outputLayerGradient, learningRate, inputResult);
 
                     loss = losses.Sum() / losses.Count;
+                    accuracy = accuracyList.Sum() / accuracyList.Count;
 
-
-                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss}, count of right precisions - {countPrec}");
+                    Console.WriteLine($"Epoch - {i}, step - {j}, loss - {loss}, accuracy - {accuracy}");
 
                     toReturn.Add(Math.Abs(loss));
+                    toReturnAc.Add(Math.Abs(accuracy));
+
                     if (Math.Abs(loss) < lossEps)
                     {
                         break;
@@ -229,10 +236,10 @@ namespace NeuralNetwork.Networks
                 }
             }
 
-            return toReturn;
+            return new Tuple<List<double>, List<double>>(toReturn, toReturnAc);
         }
 
-        public Tuple<double,int> FeedForwardStep(double learningRate, List<double[][]> input, double[] inputResult)
+        public Tuple<double,double> FeedForwardStep(double learningRate, List<double[][]> input, double[] inputResult)
         {
             var loss = .0;
 

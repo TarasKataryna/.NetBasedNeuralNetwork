@@ -59,9 +59,13 @@ namespace RecognitionNN
 			Thread.CurrentThread.CurrentCulture = customCulture;
 
 			List<double> lossCollection = new List<double>();
+			List<double> accuracyCollection = new List<double>();
+
 			try
 			{
-				lossCollection = CreateCnnAndRun(filepath, onGpu, sgd, saveModel, cancellation);
+				var res = CreateCnnAndRun(filepath, onGpu, sgd, saveModel, cancellation);
+				lossCollection = res.Item1;
+				accuracyCollection = res.Item2;
 			}
 			catch (Exception ex)
 			{
@@ -75,14 +79,24 @@ namespace RecognitionNN
 				string.Join(";", Enumerable.Range(1, lossCollection.Count))
 			};
 
+			var accuraccyStringCollection = string.Join(";", accuracyCollection);
+			var accuracyList = new List<string>
+			{
+				accuraccyStringCollection,
+				string.Join(";", Enumerable.Range(1, accuracyCollection.Count))
+			};
+
 			if (saveModel)
 			{
 				Console.WriteLine("Save model to db");
-				SaveNetworkToDB(LastNetwork as CNN, "firstTesting");
+				SaveNetworkToDB(LastNetwork as CNN, "LONG_TRAIN");
 			}
 
-			Console.WriteLine("Save results");
+			Console.WriteLine("Save loss");
 			reader.Write(configuration["loss_results"], resultList);
+
+			Console.WriteLine("Save accuraccy");
+			reader.Write(configuration["accuraccy_results"], accuracyList);
 
 			Console.WriteLine("Launch analysis");
 			//LaunchAnalysis(lossStringCollection);
@@ -141,19 +155,20 @@ namespace RecognitionNN
 			return loss;
 		}
 
-		private List<double> CreateCnnAndRun(string imgInfoPath, bool onGpu, bool sgd, bool saveModel, CancellationToken cancellation)
+		private Tuple<List<double>, List<double>> CreateCnnAndRun(string imgInfoPath, bool onGpu, bool sgd, bool saveModel, CancellationToken cancellation)
 		{
 			var inputLayerNeuronsCount = 972;
 			var hiddenLayerNeuronsCount = 300;
 			var outputLayerNeuronsCount = 90;
 
-			var learningRate = 0.03;
+			var learningRate = 0.001;
 			var lossEps = 10e-7;
 			var classCount = 90;
 
 			var network = (CNN)factory.CreateStandart(inputLayerNeuronsCount, hiddenLayerNeuronsCount, outputLayerNeuronsCount);
 
 			List<double> results = null;
+			List<double> accuraccy = null;
 
 			var imageInfo = JArray.Parse(File.ReadAllText(imgInfoPath)).AsJEnumerable().ToList();
 
@@ -176,7 +191,9 @@ namespace RecognitionNN
 				}
 				else
 				{
-					results = network.MiniBatchSGD(3, learningRate, 32, lossEps, imagePaths, inputResults, classCount, cancellation);
+					var res = network.MiniBatchSGD(3, learningRate, 32, lossEps, imagePaths, inputResults, classCount, cancellation);
+					results = res.Item1;
+					accuraccy = res.Item2;
 				}
 			}
 			else
@@ -186,7 +203,7 @@ namespace RecognitionNN
 
 			LastNetwork = network;
 
-			return results;
+			return new Tuple<List<double>, List<double>>(results, accuraccy);
 		}
 
 		private void LaunchAnalysis(string loss)

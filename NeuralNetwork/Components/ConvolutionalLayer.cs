@@ -170,7 +170,7 @@ namespace NeuralNetwork.Components
                             res += gradOutput[a][b] * inputForKernelLayer[i + a][j + b];
                         }
                     }
-                    Kernels[kernelIndex][kernelLayerIndex][i][j] += res * LearningRate;
+                    Kernels[kernelIndex][kernelLayerIndex][i][j] -= res * LearningRate;
                 }
             }
         }
