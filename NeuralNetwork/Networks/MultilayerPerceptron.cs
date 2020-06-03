@@ -25,7 +25,7 @@ namespace NeuralNetwork.Networks
 
         public MultilayerPerceptron()
         {
-	        Layers = new List<Layer>();
+            Layers = new List<Layer>();
         }
 
         public MultilayerPerceptron(List<Layer> layers)
@@ -41,6 +41,8 @@ namespace NeuralNetwork.Networks
         {
             Layers.Add(layer);
         }
+
+        #region MSE
 
         //vectorized train
         public void Train(float learningRate, int epochCounts, double[][] inputData, double[][] inputResults, int batchSize, bool toShuffle)
@@ -180,7 +182,7 @@ namespace NeuralNetwork.Networks
             FindGradientAndUpdateWeights(layerGradient, learningRate, 0, ref prevWeight, prevLayerGradient: prevLayerGradient, input: input);
 
             prevLayerGradient = layerGradient.DeepCopy();
-            var inputLayerGradient = GetInputLayerGradient(input, prevLayerGradient,ref  prevWeight);
+            var inputLayerGradient = GetInputLayerGradient(input, prevLayerGradient, ref prevWeight);
 
             return new Tuple<double, double[]>(loss, inputLayerGradient);
         }
@@ -206,16 +208,17 @@ namespace NeuralNetwork.Networks
             loss /= OutputLayer.NeuronsCount;
 
             //calculating count of right precision
-            var resIdx = inputResults.IndexOf(1);
-            var accuracy = OutputLayer.OutputNonMatrix[resIdx] - inputResults[resIdx];
+            //var resIdx = inputResults.IndexOf(1);
+            //var accuracy = OutputLayer.OutputNonMatrix[resIdx] - inputResults[resIdx];
 
-            //var maxValue = OutputLayer.OutputNonMatrix.Max();
-            //var maxValueIndex = OutputLayer.OutputNonMatrix.IndexOf(maxValue);
-            //double accuraccy = 0;
-            //if (maxValueIndex == resIdx)
-            //{
-            //    accuraccy = inputResults[re]
-            //}
+            var resIdx = inputResults.IndexOf(1);
+            var maxValue = OutputLayer.OutputNonMatrix.Max();
+            var maxValueIndex = OutputLayer.OutputNonMatrix.IndexOf(maxValue);
+            double accuracy = 0;
+            if (maxValueIndex == resIdx)
+            {
+                accuracy = 1;
+            }
 
             return new Tuple<double, double>(loss, accuracy);
         }
@@ -303,7 +306,7 @@ namespace NeuralNetwork.Networks
                 }
             }
 
-            
+
             prevWeight = Layers[layerIndex].Weights.DeepCopy();
 
             if (layerIndex != 0)
@@ -334,7 +337,7 @@ namespace NeuralNetwork.Networks
         {
             //It's not fully computed gradient 
             //because we don't know about activate function in flatten layer
-            
+
             //We have to multiple each item of this gradient on activate function gradient in our cnn
 
             var layerGradient = new double[input.Length];
@@ -352,5 +355,118 @@ namespace NeuralNetwork.Networks
 
         #endregion
 
+        #endregion
+
+        #region CrossEntropy
+
+
+        public Tuple<double, double[]> SGDStepCrossEntropy(double learningRate, double[] input, double[] inputResults)
+        {
+            var loss = .0;
+
+            //feedforward
+            double[] lastOut = input;
+            for (int i = 0; i < 1; ++i)
+            {
+                Layers[i].Activate(Layers[i].Sum(lastOut));
+                lastOut = Layers[i].OutputNonMatrix;
+            }
+
+            lastOut = Layers[1].Sum(lastOut);
+            Layers[1].OutputNonMatrix = lastOut;
+
+            double[] softMaxOutput = new double[inputResults.Length];
+
+            for (int i = 0; i < inputResults.Length; ++i)
+            {
+                softMaxOutput[i] = Layers[0].ActivateSoftmax(Layers[LayersCount - 1].OutputNonMatrix, i);
+            }
+
+            var b = softMaxOutput.Sum();
+
+            //calculating loss
+            for (int i = 0; i < OutputLayer.NeuronsCount; ++i)
+            {
+                loss += Math.Log(softMaxOutput[i]) * inputResults[i];
+            }
+
+            loss = loss * -1;
+
+            //backprop
+            var prevWeight = OutputLayer.Weights.DeepCopy();
+            var layerGradient = new double[OutputLayer.NeuronsCount];
+            double[] prevLayerGradient;
+
+            //softmax layer
+            for (int i = 0; i < softMaxOutput.Length; ++i)
+            {
+                layerGradient[i] = softMaxOutput[i] - inputResults[i];
+            }
+
+            //last layer
+            prevLayerGradient = layerGradient.DeepCopy();
+            layerGradient = new double[Layers[0].NeuronsCount];
+            FindGradientAndUpdateWeightsCrossEntropy(layerGradient, learningRate, Layers.Count - 1, ref prevWeight, prevLayerGradient: prevLayerGradient, inputResults: inputResults);
+
+            //first hidden layer
+            prevLayerGradient = layerGradient.DeepCopy();
+            layerGradient = new double[Layers[0].NeuronsCount];
+            FindGradientAndUpdateWeightsCrossEntropy(layerGradient, learningRate, 0, ref prevWeight, prevLayerGradient: prevLayerGradient, input: input);
+
+            prevLayerGradient = layerGradient.DeepCopy();
+            var inputLayerGradient = GetInputLayerGradient(input, prevLayerGradient, ref prevWeight);
+
+            return new Tuple<double, double[]>(loss, inputLayerGradient);
+        }
+
+        private void FindGradientAndUpdateWeightsCrossEntropy(
+            double[] layerGradient,
+            double learningRate,
+            int layerIndex,
+            ref double[][] prevWeight,
+            double[] inputResults = null,
+            double[] input = null,
+            double[] prevLayerGradient = null)
+        {
+            if (layerIndex != 1)
+                for (int i = 0; i < Layers[layerIndex].NeuronsCount; ++i)
+                {
+                    layerGradient[i] = .0;
+                    for (int j = 0; j < Layers[layerIndex + 1].NeuronsCount; ++j)
+                    {
+                        layerGradient[i] += prevLayerGradient[j] * prevWeight[i][j];
+                    }
+                    layerGradient[i] *= Layers[layerIndex].ActivateFunctionDerivative(Layers[layerIndex].SumOutputNonMatrix[i]);
+                }
+
+
+
+            prevWeight = Layers[layerIndex].Weights.DeepCopy();
+
+            if (layerIndex != 0)
+            {
+                for (int i = 0; i < Layers[layerIndex].WeightRowsCount; ++i)
+                {
+                    for (int j = 0; j < Layers[layerIndex].WeightColumnsCount; ++j)
+                    {
+                        var gradientWeight = layerGradient[j] * Layers[layerIndex - 1].OutputNonMatrix[i];
+                        Layers[layerIndex].Weights[i][j] -= learningRate * layerGradient[j] * Layers[layerIndex - 1].OutputNonMatrix[i];
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Layers[0].WeightRowsCount; ++i)
+                {
+                    for (int j = 0; j < Layers[0].WeightColumnsCount; ++j)
+                    {
+                        double gradientWeight = layerGradient[j] * input[i];
+                        Layers[0].Weights[i][j] -= learningRate * layerGradient[j] * input[i];
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

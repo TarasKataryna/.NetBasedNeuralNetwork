@@ -25,9 +25,6 @@ namespace NeuralNetwork.Factory
             ActivateFunction activateFunctionDerivative = (double x) => { return (1 / (1 + Math.Exp((-1) * x))) * (1 - (1 / (1 + Math.Exp((-1) * x)))); };
 
 
-            //ActivateFunction activateFunction = (double x) => { return Math.Tanh(x); };
-            //ActivateFunction activateFunctionDerivative = (double x) => { return 1 - Math.Pow(Math.Tanh(x), 2); };
-
             //normal distribution
             Normal normal = new Normal(0, Math.Pow(inputLayerNeuronsCount, -0.5));
 

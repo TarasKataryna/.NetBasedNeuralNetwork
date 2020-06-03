@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 
 using NeuralNetwork.Extensions;
@@ -154,7 +156,7 @@ namespace NeuralNetwork.Components
             double[][] inputForKernelLayer,
             double[][] gradOutput,
             int kernelIndex,
-            int kernelLayerIndex)
+            int kernelDepthIndex)
         {
 
             //just simple convolution with weight update 
@@ -170,7 +172,7 @@ namespace NeuralNetwork.Components
                             res += gradOutput[a][b] * inputForKernelLayer[i + a][j + b];
                         }
                     }
-                    Kernels[kernelIndex][kernelLayerIndex][i][j] -= res * LearningRate;
+                    Kernels[kernelIndex][kernelDepthIndex][i][j] -= res * LearningRate;
                 }
             }
         }

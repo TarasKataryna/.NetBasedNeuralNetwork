@@ -123,7 +123,7 @@ namespace NeuralNetwork.Components
                             }
                         }
                     }
-                    toReturn[iOfMax][indexJ] = map[i][j];
+                    toReturn[iOfMax][jOfMax] = map[i][j];
                 }
             }
 

@@ -80,7 +80,7 @@ namespace NeuralNetwork.Factory
                 kernel[i] = new double[kernelSize];
                 for (int j = 0; j < kernelSize; ++j)
                 {
-                    kernel[i][j] = normal.Sample();
+                    kernel[i][j] = normal.Sample() ;
                 }
             }
 

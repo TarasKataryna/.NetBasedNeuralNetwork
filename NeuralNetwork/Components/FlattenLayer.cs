@@ -41,7 +41,6 @@ namespace NeuralNetwork.Components
                     Array.Copy(maps[i][j], 0, toReturn, i * mapsLength + j * maps[i].Length, maps[i].Length);
                 }
             }
-
             //ActivateAll(toReturn);
             LastOutput = toReturn;
 

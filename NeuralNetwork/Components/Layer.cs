@@ -124,6 +124,18 @@ namespace NeuralNetwork.Components
             return toReturn;
         }
 
+        public double ActivateSoftmax(double[] sum, int index)
+        {
+            var zn = .0;
+
+            for(int i = 0; i < sum.Length; ++i)
+            {
+                zn += Math.Exp(sum[i]);    
+            }
+
+            return Math.Exp(sum[index]) / zn;
+        }
+
         #endregion
     }
 }
